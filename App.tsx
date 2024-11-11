@@ -6,7 +6,7 @@ import {
   FlatList,
   Pressable,
   Alert,
-  SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
 import BankNoteCard from "@/components/BankNoteCard";
 
@@ -14,6 +14,7 @@ export default function Index() {
   const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
   const [bankNotes, setBankNotes] = useState<number[]>([]);
   const [quantities, setQuantities] = useState<number[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Fetch data from the backend server on mount
   useEffect(() => {
@@ -31,6 +32,8 @@ export default function Index() {
         );
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -74,31 +77,47 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Cash in Hand</Text>
-      <Pressable
-        style={({ pressed }) => [styles.button, { opacity: pressed ? 0.7 : 1 }]}
-        onPress={handleResetAll}
-      >
-        <Text style={{ color: "white", alignSelf: "center" }}>Reset all</Text>
-      </Pressable>
-      <FlatList
-        data={bankNotes}
-        keyExtractor={(item) => item.toString()}
-        renderItem={({ item, index }) => (
-          <BankNoteCard
-            note={item}
-            quantity={quantities[index]}
-            onUpdateQuantity={(newQuantity) =>
-              handleUpdateQuantity(index, newQuantity)
-            }
+      {loading ? (
+        <View style={styles.initialLoader}>
+          <ActivityIndicator size="large" color="green" />
+        </View>
+      ) : (
+        <>
+          <Pressable
+            style={({ pressed }) => [
+              styles.button,
+              { opacity: pressed ? 0.7 : 1 },
+            ]}
+            onPress={handleResetAll}
+          >
+            <Text style={{ color: "white", alignSelf: "center" }}>
+              Reset all
+            </Text>
+          </Pressable>
+          <FlatList
+            data={bankNotes}
+            keyExtractor={(item) => item.toString()}
+            renderItem={({ item, index }) => (
+              <BankNoteCard
+                note={item}
+                quantity={quantities[index]}
+                onUpdateQuantity={(newQuantity) =>
+                  handleUpdateQuantity(index, newQuantity)
+                }
+              />
+            )}
           />
-        )}
-      />
-      <Pressable
-        style={({ pressed }) => [styles.button, { opacity: pressed ? 0.7 : 1 }]}
-        onPress={handleUpdate}
-      >
-        <Text style={{ color: "white", alignSelf: "center" }}>Update</Text>
-      </Pressable>
+          <Pressable
+            style={({ pressed }) => [
+              styles.button,
+              { opacity: pressed ? 0.7 : 1 },
+            ]}
+            onPress={handleUpdate}
+          >
+            <Text style={{ color: "white", alignSelf: "center" }}>Update</Text>
+          </Pressable>
+        </>
+      )}
     </View>
   );
 }
@@ -120,5 +139,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     alignSelf: "center",
     fontWeight: "bold",
+  },
+  initialLoader: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
