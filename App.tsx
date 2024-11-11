@@ -8,6 +8,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import BankNoteCard from "@/components/BankNoteCard";
 
 export default function Index() {
@@ -16,29 +17,37 @@ export default function Index() {
   const [quantities, setQuantities] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Function to fetch the data from the server
+  const fetchData = async () => {
+    setLoading(true); // Set loading state to true
+    try {
+      const response = await fetch(`${apiEndpoint}/fetchQuantities`);
+      const { bankNotes: fetchedBankNotes, quantities: fetchedQuantities } =
+        await response.json();
+
+      setBankNotes(fetchedBankNotes || []); // Set the bankNotes from the response
+      setQuantities(
+        fetchedQuantities && fetchedQuantities.length
+          ? fetchedQuantities
+          : fetchedBankNotes.map(() => 0)
+      );
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      Alert.alert("Error", "Failed to fetch data. Please try again.");
+    } finally {
+      setLoading(false); // Set loading state to false after fetching is complete
+    }
+  };
+
   // Fetch data from the backend server on mount
   useEffect(() => {
-    const loadInitialQuantities = async () => {
-      try {
-        const response = await fetch(`${apiEndpoint}/fetchQuantities`);
-        const { bankNotes: fetchedBankNotes, quantities: fetchedQuantities } =
-          await response.json();
-
-        setBankNotes(fetchedBankNotes || []); // Set the bankNotes from the response
-        setQuantities(
-          fetchedQuantities && fetchedQuantities.length
-            ? fetchedQuantities
-            : fetchedBankNotes.map(() => 0)
-        );
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadInitialQuantities();
+    fetchData();
   }, []);
+
+  // Sync button handler to manually trigger data fetch
+  const handleSync = () => {
+    fetchData();
+  };
 
   const handleResetAll = () => {
     setQuantities(bankNotes.map(() => 0));
@@ -76,7 +85,15 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Cash in Hand</Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.heading}>Cash in Hand</Text>
+        <Pressable
+          style={({ pressed }) => [styles.sync, { opacity: pressed ? 0.2 : 1 }]}
+          onPress={handleSync}
+        >
+          <MaterialIcons name="sync" size={24} />
+        </Pressable>
+      </View>
       {loading ? (
         <View style={styles.initialLoader}>
           <ActivityIndicator size="large" color="green" />
@@ -135,6 +152,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 20,
   },
+  headerContainer: {
+    flex: 1,
+  },
   heading: {
     fontSize: 20,
     alignSelf: "center",
@@ -144,5 +164,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  sync: {
+    flex: 1,
+    alignSelf: "flex-end",
   },
 });
