@@ -11,7 +11,7 @@ import {
 import BankNoteCard from "@/components/BankNoteCard";
 
 export default function Index() {
-  const apiEndpoint = "https://expense-tracker-8dh8.onrender.com";
+  const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
   const [bankNotes, setBankNotes] = useState<number[]>([]);
   const [quantities, setQuantities] = useState<number[]>([]);
 
