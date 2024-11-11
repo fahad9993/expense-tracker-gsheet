@@ -87,12 +87,14 @@ export default function Index() {
     <View style={styles.container}>
       <View style={styles.headerContainer}>
         <Text style={styles.heading}>Cash in Hand</Text>
-        <Pressable
-          style={({ pressed }) => [styles.sync, { opacity: pressed ? 0.2 : 1 }]}
-          onPress={handleSync}
-        >
-          <MaterialIcons name="sync" size={24} />
-        </Pressable>
+        <View style={styles.sync}>
+          <Pressable
+            style={({ pressed }) => [{ opacity: pressed ? 0.2 : 1 }]}
+            onPress={handleSync}
+          >
+            <MaterialIcons name="sync" size={24} />
+          </Pressable>
+        </View>
       </View>
       {loading ? (
         <View style={styles.initialLoader}>
@@ -161,17 +163,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   initialLoader: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
   },
   sync: {
-    flex: 1,
-    alignSelf: "flex-end",
+    position: "absolute",
+    right: 20,
+    top: 20,
   },
 });
