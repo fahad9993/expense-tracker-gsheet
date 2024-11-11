@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "expense-tracker-gsheet",
+    "name": "Expense Tracker",
     "slug": "expense-tracker-gsheet",
     "version": "1.0.0",
     "orientation": "portrait",
