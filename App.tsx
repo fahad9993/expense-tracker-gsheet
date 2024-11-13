@@ -186,7 +186,6 @@ const styles = StyleSheet.create({
     top: 20,
   },
   total: {
-    flex: 2,
     fontSize: 18,
     fontWeight: "bold",
   },
