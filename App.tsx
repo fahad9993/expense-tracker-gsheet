@@ -126,6 +126,15 @@ export default function Index() {
               />
             )}
           />
+          <Text style={styles.total}>
+            Total amount: BDT {""}
+            {bankNotes
+              .reduce(
+                (sum, note, index) => (sum += note * quantities[index]),
+                0
+              )
+              .toLocaleString()}
+          </Text>
           <Pressable
             style={({ pressed }) => [
               styles.button,
@@ -175,5 +184,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 20,
     top: 20,
+  },
+  total: {
+    flex: 2,
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
