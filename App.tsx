@@ -8,6 +8,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import BankNoteCard from "@/components/BankNoteCard";
 
@@ -84,69 +85,73 @@ export default function Index() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.heading}>Cash in Hand</Text>
-        <View style={styles.sync}>
-          <Pressable
-            style={({ pressed }) => [{ opacity: pressed ? 0.2 : 1 }]}
-            onPress={handleSync}
-          >
-            <MaterialIcons name="sync" size={24} />
-          </Pressable>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.heading}>Cash in Hand</Text>
+          <View style={styles.sync}>
+            <Pressable
+              style={({ pressed }) => [{ opacity: pressed ? 0.2 : 1 }]}
+              onPress={handleSync}
+            >
+              <MaterialIcons name="sync" size={24} />
+            </Pressable>
+          </View>
         </View>
-      </View>
-      {loading ? (
-        <View style={styles.initialLoader}>
-          <ActivityIndicator size="large" color="green" />
-        </View>
-      ) : (
-        <>
-          <Pressable
-            style={({ pressed }) => [
-              styles.button,
-              { opacity: pressed ? 0.7 : 1 },
-            ]}
-            onPress={handleResetAll}
-          >
-            <Text style={{ color: "white", alignSelf: "center" }}>
-              Reset all
+        {loading ? (
+          <View style={styles.initialLoader}>
+            <ActivityIndicator size="large" color="green" />
+          </View>
+        ) : (
+          <>
+            <Pressable
+              style={({ pressed }) => [
+                styles.button,
+                { opacity: pressed ? 0.7 : 1 },
+              ]}
+              onPress={handleResetAll}
+            >
+              <Text style={{ color: "white", alignSelf: "center" }}>
+                Reset all
+              </Text>
+            </Pressable>
+            <FlatList
+              data={bankNotes}
+              keyExtractor={(item) => item.toString()}
+              renderItem={({ item, index }) => (
+                <BankNoteCard
+                  note={item}
+                  quantity={quantities[index]}
+                  onUpdateQuantity={(newQuantity) =>
+                    handleUpdateQuantity(index, newQuantity)
+                  }
+                />
+              )}
+            />
+            <Text style={styles.total}>
+              Total amount: BDT {""}
+              {bankNotes
+                .reduce(
+                  (sum, note, index) => (sum += note * quantities[index]),
+                  0
+                )
+                .toLocaleString()}
             </Text>
-          </Pressable>
-          <FlatList
-            data={bankNotes}
-            keyExtractor={(item) => item.toString()}
-            renderItem={({ item, index }) => (
-              <BankNoteCard
-                note={item}
-                quantity={quantities[index]}
-                onUpdateQuantity={(newQuantity) =>
-                  handleUpdateQuantity(index, newQuantity)
-                }
-              />
-            )}
-          />
-          <Text style={styles.total}>
-            Total amount: BDT {""}
-            {bankNotes
-              .reduce(
-                (sum, note, index) => (sum += note * quantities[index]),
-                0
-              )
-              .toLocaleString()}
-          </Text>
-          <Pressable
-            style={({ pressed }) => [
-              styles.button,
-              { opacity: pressed ? 0.7 : 1 },
-            ]}
-            onPress={handleUpdate}
-          >
-            <Text style={{ color: "white", alignSelf: "center" }}>Update</Text>
-          </Pressable>
-        </>
-      )}
-    </View>
+            <Pressable
+              style={({ pressed }) => [
+                styles.button,
+                { opacity: pressed ? 0.7 : 1 },
+              ]}
+              onPress={handleUpdate}
+            >
+              <Text style={{ color: "white", alignSelf: "center" }}>
+                Update
+              </Text>
+            </Pressable>
+          </>
+        )}
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
@@ -160,8 +165,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    marginTop: 20,
-    padding: 20,
+    padding: 10,
   },
   headerContainer: {
     flex: 1,
