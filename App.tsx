@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import BankNoteCard from "@/components/BankNoteCard";
 
 export default function Index() {
@@ -129,7 +130,12 @@ export default function Index() {
               )}
             />
             <Text style={styles.total}>
-              Total amount: BDT {""}
+              Total amount:{" "}
+              <FontAwesome6
+                name="bangladeshi-taka-sign"
+                size={styles.total.fontSize}
+                color="black"
+              />{" "}
               {bankNotes
                 .reduce(
                   (sum, note, index) => (sum += note * quantities[index]),

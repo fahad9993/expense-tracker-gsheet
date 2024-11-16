@@ -1,5 +1,5 @@
-import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 type NoteProps = {
   note: number;
@@ -17,7 +17,14 @@ export default function BankNoteCard({
 
   return (
     <View style={styles.card}>
-      <Text style={styles.noteText}>{note}</Text>
+      <Text style={styles.noteText}>
+        <FontAwesome6
+          name="bangladeshi-taka-sign"
+          size={styles.noteText.fontSize}
+          color="black"
+        />{" "}
+        {note}
+      </Text>
       <View style={styles.controls}>
         <TouchableOpacity onPress={increment} style={styles.button}>
           <Text style={styles.buttonText}>+</Text>
