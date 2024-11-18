@@ -9,8 +9,7 @@ import {
 
 type buttonProps = {
   handlePress: () => void;
-  children?: React.ReactNode;
-  title?: string;
+  title: string;
   buttonStyle?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
 };
@@ -20,7 +19,6 @@ export default function CustomButton({
   buttonStyle,
   textStyle,
   title,
-  children,
 }: buttonProps) {
   return (
     <Pressable
@@ -31,13 +29,9 @@ export default function CustomButton({
       ]}
       onPress={handlePress}
     >
-      {children ? (
-        children
-      ) : (
-        <Text style={[{ color: "white", alignSelf: "center" }, textStyle]}>
-          {title}
-        </Text>
-      )}
+      <Text style={[{ color: "white", alignSelf: "center" }, textStyle]}>
+        {title}
+      </Text>
     </Pressable>
   );
 }
