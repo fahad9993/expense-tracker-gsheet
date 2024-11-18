@@ -7,6 +7,7 @@ import {
   Pressable,
   Alert,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -137,6 +138,7 @@ export default function Index() {
             <CustomButton handlePress={handleUpdate} title="Update" />
           </>
         )}
+        <StatusBar backgroundColor={"green"} barStyle={"light-content"} />
       </SafeAreaView>
     </SafeAreaProvider>
   );
