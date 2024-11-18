@@ -12,6 +12,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import BankNoteCard from "@/components/BankNoteCard";
+import CustomButton from "./components/CustomButton";
 
 export default function Index() {
   const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
@@ -105,17 +106,7 @@ export default function Index() {
           </View>
         ) : (
           <>
-            <Pressable
-              style={({ pressed }) => [
-                styles.button,
-                { opacity: pressed ? 0.7 : 1 },
-              ]}
-              onPress={handleResetAll}
-            >
-              <Text style={{ color: "white", alignSelf: "center" }}>
-                Reset all
-              </Text>
-            </Pressable>
+            <CustomButton handlePress={handleResetAll} title="Reset all" />
             <FlatList
               data={bankNotes}
               keyExtractor={(item) => item.toString()}
@@ -143,17 +134,7 @@ export default function Index() {
                 )
                 .toLocaleString()}
             </Text>
-            <Pressable
-              style={({ pressed }) => [
-                styles.button,
-                { opacity: pressed ? 0.7 : 1 },
-              ]}
-              onPress={handleUpdate}
-            >
-              <Text style={{ color: "white", alignSelf: "center" }}>
-                Update
-              </Text>
-            </Pressable>
+            <CustomButton handlePress={handleUpdate} title="Update" />
           </>
         )}
       </SafeAreaView>
