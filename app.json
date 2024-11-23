@@ -2,7 +2,7 @@
   "expo": {
     "name": "Expense Tracker",
     "slug": "expense-tracker-gsheet",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -19,8 +19,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.fahad9993.expensetrackergsheet",
-      "versionCode": 3
+      "package": "com.fahad9993.expensetrackergsheet"
     },
     "web": {
       "favicon": "./assets/favicon.png"

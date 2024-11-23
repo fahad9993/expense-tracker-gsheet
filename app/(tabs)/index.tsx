@@ -13,7 +13,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import BankNoteCard from "@/components/BankNoteCard";
-import CustomButton from "./components/CustomButton";
+import CustomButton from "@/components/CustomButton";
 
 export default function Index() {
   const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
