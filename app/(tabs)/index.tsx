@@ -107,7 +107,6 @@ export default function Index() {
           </View>
         ) : (
           <>
-            <CustomButton handlePress={handleResetAll} title="Reset all" />
             <FlatList
               data={bankNotes}
               keyExtractor={(item) => item.toString()}
@@ -135,7 +134,14 @@ export default function Index() {
                 )
                 .toLocaleString()}
             </Text>
-            <CustomButton handlePress={handleUpdate} title="Update" />
+            <View style={styles.buttonContainer}>
+              <CustomButton
+                handlePress={handleResetAll}
+                title="Reset all"
+                buttonStyle={{ backgroundColor: "red" }}
+              />
+              <CustomButton handlePress={handleUpdate} title="Update" />
+            </View>
           </>
         )}
         <StatusBar backgroundColor={"green"} barStyle={"light-content"} />
@@ -145,12 +151,9 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-  button: {
-    backgroundColor: "green",
-    color: "white",
-    padding: 10,
-    marginTop: 20,
-    borderRadius: 10,
+  buttonContainer: {
+    flexDirection: "row",
+    gap: 5,
   },
   container: {
     flex: 1,
