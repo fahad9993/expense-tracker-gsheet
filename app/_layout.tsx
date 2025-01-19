@@ -1,5 +1,5 @@
 import { Stack } from "expo-router/stack";
-import { AuthProvider, useAuth } from "../context/AuthContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 
 export default function RootLayout() {
   return (
@@ -11,7 +11,6 @@ export default function RootLayout() {
 
 function MainNavigator() {
   const { isLoggedIn } = useAuth();
-  console.log("Login state: ", isLoggedIn);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
