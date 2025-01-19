@@ -1,9 +1,33 @@
+require("dotenv").config({ path: "../.env.local" });
+
 const express = require("express");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
 const { JWT } = require("google-auth-library");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+const validUsername = process.env.VALID_USERNAME;
+const validPassword = process.env.VALID_PASSWORD;
+
+// Middleware to check if the user is authenticated
+const authenticateToken = (req, res, next) => {
+  const token = req.headers["authorization"]?.split(" ")[1]; // Extract token from Authorization header
+
+  if (!token) {
+    return res.status(401).send("Access Denied: No token provided");
+  }
+
+  jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
+    // Use the environment variable
+    if (err) {
+      return res.status(403).send("Access Denied: Invalid token");
+    }
+    req.user = user; // Attach user info to the request object
+    next(); // Proceed to the next middleware or route handler
+  });
+};
 
 // Google Sheets API setup
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
@@ -13,8 +37,24 @@ const SCOPES = [
   "https://www.googleapis.com/auth/drive.file",
 ];
 
+app.post("/login", express.json(), (req, res) => {
+  const { username, password } = req.body;
+
+  // Check credentials
+  if (username === validUsername && password === validPassword) {
+    // Create a JWT token with a secret key
+    const token = jwt.sign({ username }, process.env.SECRET_KEY, {
+      expiresIn: "1h",
+    });
+
+    return res.json({ token }); // Send token to frontend
+  } else {
+    return res.status(401).send("Invalid credentials");
+  }
+});
+
 // Fetch initial quantities from Google Sheets
-app.get("/fetchQuantities", async (req, res) => {
+app.get("/fetchQuantities", authenticateToken, async (req, res) => {
   try {
     // Authenticate with Google Sheets API using the service account
     const jwt = new JWT({
@@ -41,38 +81,43 @@ app.get("/fetchQuantities", async (req, res) => {
 });
 
 // Update quantities in Google Sheets (assuming there's a 'Qty' column)
-app.post("/updateQuantities", express.json(), async (req, res) => {
-  try {
-    const { quantities } = req.body; // An array of quantities
-    if (!Array.isArray(quantities)) {
-      return res.status(400).send("Invalid data format");
+app.post(
+  "/updateQuantities",
+  authenticateToken,
+  express.json(),
+  async (req, res) => {
+    try {
+      const { quantities } = req.body; // An array of quantities
+      if (!Array.isArray(quantities)) {
+        return res.status(400).send("Invalid data format");
+      }
+
+      // Authenticate and access Google Sheets
+      const jwt = new JWT({
+        email: process.env.CLIENT_EMAIL,
+        key: process.env.PRIVATE_KEY.replace(/\\n/g, "\n"),
+        scopes: SCOPES,
+      });
+
+      const doc = new GoogleSpreadsheet(SPREADSHEET_ID, jwt);
+
+      await doc.loadInfo();
+      const sheet = doc.sheetsByTitle[SHEET_TITLE];
+      const rows = await sheet.getRows();
+
+      // Update rows based on the quantities
+      rows.forEach(async (row, index) => {
+        row._rawData[1] = quantities[index] || 0;
+        await row.save(); // Ensure the save operation completes
+      });
+
+      res.status(200).send("Quantities updated successfully");
+    } catch (error) {
+      console.error("Error updating quantities:", error);
+      res.status(500).send("Error updating data in Google Sheets");
     }
-
-    // Authenticate and access Google Sheets
-    const jwt = new JWT({
-      email: process.env.CLIENT_EMAIL,
-      key: process.env.PRIVATE_KEY.replace(/\\n/g, "\n"),
-      scopes: SCOPES,
-    });
-
-    const doc = new GoogleSpreadsheet(SPREADSHEET_ID, jwt);
-
-    await doc.loadInfo();
-    const sheet = doc.sheetsByTitle[SHEET_TITLE];
-    const rows = await sheet.getRows();
-
-    // Update rows based on the quantities
-    rows.forEach(async (row, index) => {
-      row._rawData[1] = quantities[index] || 0;
-      await row.save(); // Ensure the save operation completes
-    });
-
-    res.status(200).send("Quantities updated successfully");
-  } catch (error) {
-    console.error("Error updating quantities:", error);
-    res.status(500).send("Error updating data in Google Sheets");
   }
-});
+);
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

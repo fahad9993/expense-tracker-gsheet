@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   StatusBar,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -23,18 +24,34 @@ export default function Home() {
 
   // Function to fetch the data from the server
   const fetchData = async () => {
+    const token = await AsyncStorage.getItem("authToken");
+
+    if (!token) {
+      Alert.alert("Please log in first!");
+      return;
+    }
+
     setLoading(true); // Set loading state to true
     try {
-      const response = await fetch(`${apiEndpoint}/fetchQuantities`);
-      const { bankNotes: fetchedBankNotes, quantities: fetchedQuantities } =
-        await response.json();
+      const response = await fetch(`${apiEndpoint}/fetchQuantities`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const { bankNotes: fetchedBankNotes, quantities: fetchedQuantities } =
+          await response.json();
 
-      setBankNotes(fetchedBankNotes || []); // Set the bankNotes from the response
-      setQuantities(
-        fetchedQuantities && fetchedQuantities.length
-          ? fetchedQuantities
-          : fetchedBankNotes.map(() => 0)
-      );
+        setBankNotes(fetchedBankNotes || []); // Set the bankNotes from the response
+        setQuantities(
+          fetchedQuantities && fetchedQuantities.length
+            ? fetchedQuantities
+            : fetchedBankNotes.map(() => 0)
+        );
+      } else {
+        Alert.alert("Failed to fetch quantities", "You may need to log in.");
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
       Alert.alert("Error", "Failed to fetch data. Please try again.");
@@ -66,11 +83,13 @@ export default function Home() {
   };
 
   const handleUpdate = async () => {
+    const token = await AsyncStorage.getItem("authToken");
     try {
       await fetch(`${apiEndpoint}/updateQuantities`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ quantities }),
       });
