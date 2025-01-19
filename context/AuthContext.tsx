@@ -10,7 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage"; // AsyncSt
 // Define the type for the AuthContext
 interface AuthContextType {
   isLoggedIn: boolean;
-  login: () => void;
+  login: (token: string) => void;
   logout: () => void;
 }
 
@@ -29,9 +29,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     const checkLoginState = async () => {
       try {
-        const savedLoginState = await AsyncStorage.getItem("isLoggedIn");
-        if (savedLoginState === "true") {
-          setIsLoggedIn(true); // Set logged in state if found in AsyncStorage
+        const token = await AsyncStorage.getItem("authToken");
+        if (token) {
+          setIsLoggedIn(true); // User is logged in if token exists
         }
       } catch (error) {
         console.log("Error checking login state", error);
@@ -41,22 +41,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     checkLoginState();
   }, []);
 
-  const login = async () => {
-    try {
-      await AsyncStorage.setItem("isLoggedIn", "true"); // Save login state
-      setIsLoggedIn(true);
-    } catch (error) {
-      console.log("Error saving login state", error);
-    }
+  const login = async (token: string) => {
+    await AsyncStorage.setItem("authToken", token); // Store token
+    setIsLoggedIn(true);
   };
 
   const logout = async () => {
-    try {
-      await AsyncStorage.removeItem("isLoggedIn"); // Remove login state
-      setIsLoggedIn(false);
-    } catch (error) {
-      console.log("Error removing login state", error);
-    }
+    await AsyncStorage.removeItem("authToken"); // Remove token
+    setIsLoggedIn(false);
   };
 
   return (
