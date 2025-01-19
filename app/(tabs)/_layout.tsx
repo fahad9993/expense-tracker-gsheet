@@ -1,12 +1,13 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 
 export default function TabLayout() {
+  const router = useRouter(); // Access router for navigation
   return (
     <Tabs screenOptions={{ tabBarActiveTintColor: "blue" }}>
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
           title: "Home",
           headerShown: false,
@@ -22,6 +23,16 @@ export default function TabLayout() {
           headerShown: false,
           tabBarIcon: ({ color }) => (
             <AntDesign size={24} name="form" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="logout"
+        options={{
+          title: "Logout",
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
+            <AntDesign size={24} name="logout" color={color} />
           ),
         }}
       />
