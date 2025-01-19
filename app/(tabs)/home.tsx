@@ -15,8 +15,8 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import BankNoteCard from "@/components/BankNoteCard";
 import CustomButton from "@/components/CustomButton";
 
-export default function Index() {
-  const apiEndpoint = process.env.API_ENDPOINT;
+export default function Home() {
+  const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
   const [bankNotes, setBankNotes] = useState<number[]>([]);
   const [quantities, setQuantities] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
