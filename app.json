@@ -30,6 +30,9 @@
       }
     },
     "newArchEnabled": true,
-    "scheme": "expensetracker"
+    "scheme": "expensetracker",
+    "plugins": [
+      "expo-router"
+    ]
   }
 }
