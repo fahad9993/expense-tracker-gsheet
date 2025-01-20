@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import { FontAwesome } from "@expo/vector-icons";
 
 const Index = () => {
@@ -21,8 +21,6 @@ const Index = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
-    console.log("Sending username:", username);
-    console.log("Sending password:", password);
     try {
       // Make POST request to your server with the username and password
       const response = await fetch(
@@ -33,12 +31,9 @@ const Index = () => {
           body: JSON.stringify({ username, password }),
         }
       );
-      console.log(response);
       if (response.ok) {
         const data = await response.json();
         const { token } = data;
-        console.log(data);
-
         // On successful login, store the token and navigate
         login(token); // Save token using context
         router.replace("/home"); // Navigate to the home screen
