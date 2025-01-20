@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
+  Image,
   View,
   Text,
-  Button,
   TextInput,
   StyleSheet,
   Alert,
@@ -11,6 +11,7 @@ import {
 import { useRouter } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import { FontAwesome } from "@expo/vector-icons";
+import Feather from "@expo/vector-icons/Feather";
 
 const Index = () => {
   const router = useRouter();
@@ -47,18 +48,25 @@ const Index = () => {
 
   return (
     <View style={styles.container}>
+      <Image
+        style={styles.image}
+        source={require("@/assets/adaptive-icon.png")}
+      />
       <Text style={styles.title}>Welcome to Expense Tracker!</Text>
 
       {/* Username Input */}
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={(text) => setUsername(text)}
-      />
-
+      <View style={styles.fieldContainer}>
+        <Feather style={styles.icons} name="user" size={24} color="black" />
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          value={username}
+          onChangeText={(text) => setUsername(text)}
+        />
+      </View>
       {/* Password Input */}
-      <View style={styles.passwordContainer}>
+      <View style={styles.fieldContainer}>
+        <Feather style={styles.icons} name="lock" size={20} color="black" />
         <TextInput
           style={styles.input}
           placeholder="Password"
@@ -80,12 +88,28 @@ const Index = () => {
       </View>
 
       {/* Login Button */}
-      <Button title="Login" onPress={handleLogin} />
+      {/* <Button title="Login" onPress={handleLogin} /> */}
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  button: {
+    width: "100%",
+    height: 50,
+    backgroundColor: "#1E90FF",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 18,
+  },
   container: {
     flex: 1,
     justifyContent: "center",
@@ -98,20 +122,32 @@ const styles = StyleSheet.create({
     top: "50%",
     transform: [{ translateY: -17 }], // Center vertically
   },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
+  fieldContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+  },
+  icons: {
+    position: "absolute",
+    left: 10,
+    top: "50%",
+    transform: [{ translateY: -19 }], // Center vertically
+  },
   input: {
     width: "100%",
     padding: 10,
+    paddingLeft: 40,
     borderWidth: 1,
     borderColor: "gray",
     borderRadius: 5,
     marginBottom: 15,
   },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
+  image: {
+    width: 200,
+    height: 200,
+    resizeMode: "contain",
   },
+  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
 });
 
 export default Index;
