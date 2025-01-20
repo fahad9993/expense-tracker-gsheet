@@ -28,6 +28,8 @@
       "eas": {
         "projectId": "c65d31a3-e461-48d2-9a7b-c2c9085fb0ac"
       }
-    }
+    },
+    "newArchEnabled": true,
+    "scheme": "expensetracker"
   }
 }
