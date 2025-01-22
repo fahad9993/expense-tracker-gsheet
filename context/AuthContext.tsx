@@ -10,6 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage"; // AsyncSt
 // Define the type for the AuthContext
 interface AuthContextType {
   isLoggedIn: boolean;
+  isLoading: boolean;
   login: (token: string) => void;
   logout: () => void;
 }
@@ -24,6 +25,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Check if the user is logged in when the app starts
   useEffect(() => {
@@ -35,11 +37,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
       } catch (error) {
         console.log("Error checking login state", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     checkLoginState();
   }, []);
+
+  if (isLoading) {
+    return null; // Or show a loading screen
+  }
 
   const login = async (token: string) => {
     await AsyncStorage.setItem("authToken", token); // Store token
@@ -52,7 +60,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
