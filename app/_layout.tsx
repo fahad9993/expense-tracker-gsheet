@@ -1,6 +1,6 @@
 import { Stack } from "expo-router/stack";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
 export default function RootLayout() {
   return (
@@ -14,7 +14,11 @@ function MainNavigator() {
   const { isLoggedIn, isLoading } = useAuth();
 
   if (isLoading) {
-    return <ActivityIndicator size="large" />; // Render a loading spinner or blank screen
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#1E90FF" />
+      </View>
+    ); // Render a loading spinner or blank screen
   }
 
   return (
