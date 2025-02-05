@@ -34,10 +34,13 @@ const Index = () => {
       );
       if (response.ok) {
         const data = await response.json();
-        const { token } = data;
-        // On successful login, store the token and navigate
-        login(token); // Save token using context
-        router.replace("/home"); // Navigate to the home screen
+
+        if (data && data.token) {
+          login(data.token);
+          router.replace("/home"); // Navigate to the home screen
+        } else {
+          Alert.alert("Login Failed", "Invalid response from server");
+        }
       } else {
         Alert.alert("Login Failed", "Invalid username or password");
       }
