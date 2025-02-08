@@ -21,12 +21,14 @@ function MainNavigator() {
     ); // Render a loading spinner or blank screen
   }
 
+  console.log("Final isLoggedIn:", isLoggedIn);
+
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      {!isLoggedIn ? (
-        <Stack.Screen name="index" />
-      ) : (
+      {isLoggedIn ? (
         <Stack.Screen name="(tabs)" />
+      ) : (
+        <Stack.Screen name="index" />
       )}
     </Stack>
   );

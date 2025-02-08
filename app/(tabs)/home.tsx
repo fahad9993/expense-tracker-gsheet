@@ -39,6 +39,13 @@ export default function Home() {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      if (response.status === 401) {
+        await AsyncStorage.removeItem("authToken");
+        Alert.alert("Session expired!", "Please log in again.");
+        return;
+      }
+
       if (response.ok) {
         const { bankNotes: fetchedBankNotes, quantities: fetchedQuantities } =
           await response.json();

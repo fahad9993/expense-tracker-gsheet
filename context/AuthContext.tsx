@@ -6,7 +6,6 @@ import {
   ReactNode,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // AsyncStorage import
-import { ActivityIndicator, View } from "react-native";
 
 // Define the type for the AuthContext
 interface AuthContextType {
@@ -33,8 +32,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const checkLoginState = async () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
-        if (token) {
-          setIsLoggedIn(true); // User is logged in if token exists
+        console.log("token:", token);
+        if (token && token !== "null" && token !== "undefined") {
+          setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
         }
       } catch (error) {
         console.log("Error checking login state", error);
@@ -45,14 +47,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     checkLoginState();
   }, []);
-
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#1E90FF" />
-      </View>
-    );
-  }
 
   const login = async (token: string) => {
     await AsyncStorage.setItem("authToken", token); // Store token
