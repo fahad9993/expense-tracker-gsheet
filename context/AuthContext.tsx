@@ -1,74 +1,58 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // AsyncStorage import
+import { createContext, useState, useEffect, ReactNode } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 
-// Define the type for the AuthContext
 interface AuthContextType {
-  isLoggedIn: boolean;
-  isLoading: boolean;
-  login: (token: string) => void;
+  token: string | null;
+  isAuthenticated: boolean;
+  authenticate: (token: string) => void;
   logout: () => void;
 }
 
-// Define the type for the children prop
-interface AuthProviderProps {
-  children: ReactNode; // Use ReactNode type for children
+interface AuthContextProviderProps {
+  children: ReactNode;
 }
 
-// Create the AuthContext
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType>({
+  token: "",
+  isAuthenticated: false,
+  authenticate: (token) => {},
+  logout: () => {},
+});
 
-export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+export default function AuthContextProvider({
+  children,
+}: AuthContextProviderProps) {
+  const [authToken, setAuthToken] = useState("");
+  const router = useRouter();
 
-  // Check if the user is logged in when the app starts
   useEffect(() => {
-    const checkLoginState = async () => {
-      try {
-        const token = await AsyncStorage.getItem("authToken");
-        console.log("token:", token);
-        if (token && token !== "null" && token !== "undefined") {
-          setIsLoggedIn(true);
-        } else {
-          setIsLoggedIn(false);
-        }
-      } catch (error) {
-        console.log("Error checking login state", error);
-      } finally {
-        setIsLoading(false);
+    async function fetchToken() {
+      const storedToken = await AsyncStorage.getItem("token");
+      if (storedToken) {
+        setAuthToken(storedToken);
+        router.replace("/home");
       }
-    };
-
-    checkLoginState();
+    }
+    fetchToken();
   }, []);
 
-  const login = async (token: string) => {
-    await AsyncStorage.setItem("authToken", token); // Store token
-    setIsLoggedIn(true);
-  };
-
-  const logout = async () => {
-    await AsyncStorage.removeItem("authToken"); // Remove token
-    setIsLoggedIn(false);
-  };
-
-  return (
-    <AuthContext.Provider value={{ isLoggedIn, isLoading, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+  function authenticate(token: string) {
+    setAuthToken(token);
+    AsyncStorage.setItem("token", token);
   }
-  return context;
-};
+
+  function logout() {
+    setAuthToken("");
+    AsyncStorage.removeItem("token");
+  }
+
+  const value = {
+    token: authToken,
+    isAuthenticated: !!authToken,
+    authenticate: authenticate,
+    logout: logout,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}

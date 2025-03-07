@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import BankNoteCard from "@/components/BankNoteCard";
 import CustomButton from "@/components/CustomButton";
+import { AuthContext } from "@/context/AuthContext";
 
 export default function Home() {
   const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
@@ -22,9 +23,11 @@ export default function Home() {
   const [quantities, setQuantities] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const authCtx = useContext(AuthContext);
+
   // Function to fetch the data from the server
   const fetchData = async () => {
-    const token = await AsyncStorage.getItem("authToken");
+    const token = authCtx.token;
 
     if (!token) {
       Alert.alert("Please log in first!");
@@ -41,7 +44,7 @@ export default function Home() {
       });
 
       if (response.status === 401) {
-        await AsyncStorage.removeItem("authToken");
+        await AsyncStorage.removeItem("token");
         Alert.alert("Session expired!", "Please log in again.");
         return;
       }
@@ -90,7 +93,7 @@ export default function Home() {
   };
 
   const handleUpdate = async () => {
-    const token = await AsyncStorage.getItem("authToken");
+    const token = authCtx.token;
     try {
       await fetch(`${apiEndpoint}/updateQuantities`, {
         method: "POST",

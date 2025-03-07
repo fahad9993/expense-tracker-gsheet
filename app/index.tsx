@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   Image,
   View,
@@ -9,17 +9,17 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useAuth } from "@/context/AuthContext";
+import { AuthContext } from "@/context/AuthContext";
 import { FontAwesome } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 
 const Index = () => {
-  const router = useRouter();
-  const { login } = useAuth();
-
   const [username, setUsername] = useState(""); // State for username
   const [password, setPassword] = useState(""); // State for password
   const [showPassword, setShowPassword] = useState(false);
+
+  const authCtx = useContext(AuthContext);
+  const router = useRouter();
 
   const handleLogin = async () => {
     try {
@@ -34,10 +34,13 @@ const Index = () => {
       );
       if (response.ok) {
         const data = await response.json();
+        const token = data.token;
 
-        if (data && data.token) {
-          login(data.token);
-          router.replace("/home"); // Navigate to the home screen
+        console.log("token", token);
+
+        if (!!token) {
+          authCtx.authenticate(token);
+          router.replace("/home");
         } else {
           Alert.alert("Login Failed", "Invalid response from server");
         }

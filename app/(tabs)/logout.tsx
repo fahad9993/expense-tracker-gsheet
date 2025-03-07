@@ -1,15 +1,15 @@
+import { AuthContext } from "@/context/AuthContext";
+import { useContext } from "react";
 import { View, Text, Button, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { useAuth } from "@/context/AuthContext"; // Assuming you have an AuthContext
 
 export default function Logout() {
-  const { logout } = useAuth(); // Access the logout function from AuthContext
-  const router = useRouter(); // Access router for navigation
+  const authCtx = useContext(AuthContext);
+  const router = useRouter();
 
-  // Handle logout and navigation when the button is pressed
   const handleLogout = () => {
-    logout(); // Log the user out
-    router.replace("/"); // Navigate to the welcome screen
+    authCtx.logout();
+    router.replace("/");
   };
 
   return (

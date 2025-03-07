@@ -1,35 +1,41 @@
-import { Stack } from "expo-router/stack";
-import { AuthProvider, useAuth } from "@/context/AuthContext";
-import { ActivityIndicator, View } from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { useContext } from "react";
 
-export default function RootLayout() {
+import AuthContextProvider, { AuthContext } from "@/context/AuthContext";
+import { Stack } from "expo-router/stack";
+
+function AuthStack() {
   return (
-    <AuthProvider>
-      <MainNavigator />
-    </AuthProvider>
+    <Stack>
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+    </Stack>
   );
 }
 
-function MainNavigator() {
-  const { isLoggedIn, isLoading } = useAuth();
+function AuthenticatedStack() {
+  return (
+    <Stack>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    </Stack>
+  );
+}
 
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#1E90FF" />
-      </View>
-    ); // Render a loading spinner or blank screen
-  }
-
-  console.log("Final isLoggedIn:", isLoggedIn);
+function Layout() {
+  const authCtx = useContext(AuthContext);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      {isLoggedIn ? (
-        <Stack.Screen name="(tabs)" />
-      ) : (
-        <Stack.Screen name="index" />
-      )}
-    </Stack>
+    <>
+      <StatusBar style="dark" />
+      {!authCtx.isAuthenticated ? <AuthStack /> : <AuthenticatedStack />}
+    </>
+  );
+}
+
+// ✅ Wrap everything at the root level
+export default function RootLayout() {
+  return (
+    <AuthContextProvider>
+      <Layout />
+    </AuthContextProvider>
   );
 }
