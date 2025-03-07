@@ -36,8 +36,6 @@ const Index = () => {
         const data = await response.json();
         const token = data.token;
 
-        console.log("token", token);
-
         if (!!token) {
           authCtx.authenticate(token);
           router.replace("/home");
