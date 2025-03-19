@@ -54,7 +54,7 @@ const Index = () => {
     <View style={styles.container}>
       <Image
         style={styles.image}
-        source={require("@/assets/adaptive-icon.png")}
+        source={require("../assets/adaptive-icon.png")}
       />
       <Text style={styles.title}>Welcome to Expense Tracker!</Text>
 

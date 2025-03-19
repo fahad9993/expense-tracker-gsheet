@@ -24,13 +24,19 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "extra": {
-      "eas": {
-        "projectId": "c65d31a3-e461-48d2-9a7b-c2c9085fb0ac"
-      }
-    },
     "newArchEnabled": true,
     "scheme": "expensetracker",
-    "plugins": ["expo-router"]
+    "plugins": [
+      "expo-router"
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "26c2a02d-325a-4198-a16f-b8ed98a1a758"
+      }
+    },
+    "owner": "fahad9993"
   }
 }
