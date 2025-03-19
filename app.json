@@ -35,6 +35,13 @@
         "projectId": "26c2a02d-325a-4198-a16f-b8ed98a1a758"
       }
     },
-    "owner": "fahad9993"
+    "owner": "fahad9993",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/26c2a02d-325a-4198-a16f-b8ed98a1a758",
+      "channel": "preview"
+    }
   }
 }
