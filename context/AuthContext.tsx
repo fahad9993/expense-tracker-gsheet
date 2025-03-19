@@ -31,7 +31,7 @@ export default function AuthContextProvider({
       const storedToken = await AsyncStorage.getItem("token");
       if (storedToken) {
         setAuthToken(storedToken);
-        router.replace("/home");
+        //router.replace("/home");
       }
     }
     fetchToken();

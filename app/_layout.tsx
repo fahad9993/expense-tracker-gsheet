@@ -1,8 +1,9 @@
 import { StatusBar } from "expo-status-bar";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 
 import AuthContextProvider, { AuthContext } from "@/context/AuthContext";
 import { Stack } from "expo-router/stack";
+import { useRouter } from "expo-router";
 
 function AuthStack() {
   return (
@@ -22,6 +23,13 @@ function AuthenticatedStack() {
 
 function Layout() {
   const authCtx = useContext(AuthContext);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (authCtx.isAuthenticated) {
+      router.replace("/home");
+    }
+  }, [authCtx.isAuthenticated]);
 
   return (
     <>
