@@ -17,11 +17,16 @@ const Index = () => {
   const [username, setUsername] = useState(""); // State for username
   const [password, setPassword] = useState(""); // State for password
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const authCtx = useContext(AuthContext);
   const router = useRouter();
 
   const handleLogin = async () => {
+    if (isLoggingIn) return;
+
+    setIsLoggingIn(true);
+
     try {
       // Make POST request to your server with the username and password
       const response = await fetch(
@@ -41,12 +46,15 @@ const Index = () => {
           router.replace("/home");
         } else {
           Alert.alert("Login Failed", "Invalid response from server");
+          setIsLoggingIn(false);
         }
       } else {
         Alert.alert("Login Failed", "Invalid username or password");
+        setIsLoggingIn(false);
       }
     } catch (error) {
       Alert.alert("Login Failed", "An error occurred during login");
+      setIsLoggingIn(false);
     }
   };
 
@@ -93,8 +101,14 @@ const Index = () => {
 
       {/* Login Button */}
       {/* <Button title="Login" onPress={handleLogin} /> */}
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
+      <TouchableOpacity
+        style={[styles.button, isLoggingIn && styles.disabledButton]}
+        onPress={handleLogin}
+        disabled={isLoggingIn}
+      >
+        <Text style={styles.buttonText}>
+          {isLoggingIn ? "Logging in..." : "Login"}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -119,6 +133,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+  },
+  disabledButton: {
+    backgroundColor: "#A9A9A9", // Gray color when disabled
   },
   eyeIcon: {
     position: "absolute",
