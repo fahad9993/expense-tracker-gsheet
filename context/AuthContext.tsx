@@ -103,11 +103,16 @@ export default function AuthContextProvider({
 
     if (!token || isTokenExpired(token)) {
       if (refreshToken) {
-        token = await refreshAccessToken(refreshToken);
-        if (!token) {
+        const newAccessToken = await refreshAccessToken(refreshToken);
+        if (!newAccessToken) {
           logout();
           throw new Error("Session expired");
         }
+
+        // ✅ Update global state and local reference
+        token = newAccessToken;
+        setAccessToken(token); // ← your context updater
+        await AsyncStorage.setItem("accessToken", token); // optional, for persistency
       } else {
         logout();
         throw new Error("No refresh token available");
