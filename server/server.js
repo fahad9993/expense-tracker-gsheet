@@ -127,7 +127,7 @@ app.post(
   }
 );
 
-app.post("/refresh-token", express.json(), (req, res) => {
+app.post("/refreshToken", express.json(), (req, res) => {
   const { refreshToken } = req.body;
 
   if (!refreshToken) {
