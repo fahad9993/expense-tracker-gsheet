@@ -27,46 +27,28 @@ export default function Home() {
 
   // Function to fetch the data from the server
   const fetchData = async () => {
-    const token = authCtx.token;
-
-    if (!token) {
-      Alert.alert("Please log in first!");
-      return;
-    }
-
-    setLoading(true); // Set loading state to true
+    setLoading(true);
     try {
-      const response = await fetch(`${apiEndpoint}/fetchQuantities`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await authCtx.authFetch(
+        `${apiEndpoint}/fetchQuantities`
+      );
 
-      if (response.status === 401) {
-        await AsyncStorage.removeItem("token");
-        Alert.alert("Session expired!", "Please log in again.");
-        return;
+      const { bankNotes: fetchedBankNotes, quantities: fetchedQuantities } =
+        await response.json();
+
+      setBankNotes(fetchedBankNotes || []);
+      setQuantities(
+        fetchedQuantities && fetchedQuantities.length
+          ? fetchedQuantities
+          : fetchedBankNotes.map(() => 0)
+      );
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to fetch data.");
+      if (error.message?.includes("Session expired")) {
+        authCtx.logout();
       }
-
-      if (response.ok) {
-        const { bankNotes: fetchedBankNotes, quantities: fetchedQuantities } =
-          await response.json();
-
-        setBankNotes(fetchedBankNotes || []); // Set the bankNotes from the response
-        setQuantities(
-          fetchedQuantities && fetchedQuantities.length
-            ? fetchedQuantities
-            : fetchedBankNotes.map(() => 0)
-        );
-      } else {
-        Alert.alert("Failed to fetch quantities", "You may need to log in.");
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      Alert.alert("Error", "Failed to fetch data. Please try again.");
     } finally {
-      setLoading(false); // Set loading state to false after fetching is complete
+      setLoading(false);
     }
   };
 
@@ -93,23 +75,20 @@ export default function Home() {
   };
 
   const handleUpdate = async () => {
-    const token = authCtx.token;
     try {
-      await fetch(`${apiEndpoint}/updateQuantities`, {
+      await authCtx.authFetch(`${apiEndpoint}/updateQuantities`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ quantities }),
       });
-      // Show alert if update is successful
+
       Alert.alert("Success!", "Quantities updated successfully.", [
         { text: "Ok" },
       ]);
     } catch (error) {
       console.error("Error updating quantities:", error);
-      // Show error alert if update fails
       Alert.alert("Error", "Failed to update quantities. Please try again.", [
         { text: "OK" },
       ]);

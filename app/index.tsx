@@ -24,11 +24,9 @@ const Index = () => {
 
   const handleLogin = async () => {
     if (isLoggingIn) return;
-
     setIsLoggingIn(true);
 
     try {
-      // Make POST request to your server with the username and password
       const response = await fetch(
         "https://expense-tracker-gsheet.onrender.com/login",
         {
@@ -37,23 +35,25 @@ const Index = () => {
           body: JSON.stringify({ username, password }),
         }
       );
+
       if (response.ok) {
         const data = await response.json();
         const token = data.token;
+        const refreshToken = data.refreshToken;
 
-        if (!!token) {
-          authCtx.authenticate(token);
+        if (token && refreshToken) {
+          authCtx.authenticate(token, refreshToken);
           router.replace("/home");
         } else {
           Alert.alert("Login Failed", "Invalid response from server");
-          setIsLoggingIn(false);
         }
       } else {
         Alert.alert("Login Failed", "Invalid username or password");
-        setIsLoggingIn(false);
       }
     } catch (error) {
+      console.error("Login error:", error);
       Alert.alert("Login Failed", "An error occurred during login");
+    } finally {
       setIsLoggingIn(false);
     }
   };
