@@ -1,9 +1,9 @@
 import { StatusBar } from "expo-status-bar";
 import { useContext, useEffect } from "react";
-
-import AuthContextProvider, { AuthContext } from "@/context/AuthContext";
 import { Stack } from "expo-router/stack";
 import { useRouter } from "expo-router";
+
+import AuthContextProvider, { AuthContext } from "@/context/AuthContext";
 
 function AuthStack() {
   return (
