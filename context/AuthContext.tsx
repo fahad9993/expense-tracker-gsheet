@@ -81,13 +81,13 @@ export default function AuthContextProvider({
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: refreshToken }),
+          body: JSON.stringify({ refreshToken: refreshToken }),
         }
       );
 
       if (!response.ok) throw new Error("Refresh failed");
 
-      const { accessToken: newAccessToken } = await response.json();
+      const { token: newAccessToken } = await response.json();
       await AsyncStorage.setItem("accessToken", newAccessToken);
       setAccessToken(newAccessToken);
       return newAccessToken;
