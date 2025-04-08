@@ -43,7 +43,7 @@ app.post("/login", express.json(), (req, res) => {
   if (username === validUsername && password === validPassword) {
     // Access Token (short-lived)
     const token = jwt.sign({ username }, process.env.SECRET_KEY, {
-      expiresIn: "10s",
+      expiresIn: "1h",
     });
 
     // Refresh Token (long-lived)
@@ -143,7 +143,7 @@ app.post("/refreshToken", express.json(), (req, res) => {
       { username: user.username },
       process.env.SECRET_KEY,
       {
-        expiresIn: "10s",
+        expiresIn: "1h",
       }
     );
 
