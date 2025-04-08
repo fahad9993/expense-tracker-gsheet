@@ -25,52 +25,21 @@ export const AuthContext = createContext<AuthContextType>({
   },
 });
 
-function isTokenExpired(token: string): boolean {
-  try {
-    const { exp } = jwtDecode<{ exp: number }>(token);
-    return Date.now() / 1000 > exp;
-  } catch {
-    return true;
-  }
-}
-
 export default function AuthContextProvider({
   children,
 }: AuthContextProviderProps) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const loadTokens = async () => {
-      const storedAccessToken = await AsyncStorage.getItem("accessToken");
-      const storedRefreshToken = await AsyncStorage.getItem("refreshToken");
-
-      if (storedAccessToken && !isTokenExpired(storedAccessToken)) {
-        setAccessToken(storedAccessToken);
-      } else if (storedRefreshToken) {
-        const newAccess = await refreshAccessToken(storedRefreshToken);
-        if (newAccess) {
-          setAccessToken(newAccess);
-          await AsyncStorage.setItem("accessToken", newAccess);
-        }
-      }
-    };
-
-    loadTokens();
-  }, []);
-
-  const authenticate = async (accessToken: string, refreshToken: string) => {
-    setAccessToken(accessToken);
-    await AsyncStorage.setItem("accessToken", accessToken);
-    await AsyncStorage.setItem("refreshToken", refreshToken);
-  };
-
-  const logout = async () => {
-    setAccessToken(null);
-    await AsyncStorage.removeItem("accessToken");
-    await AsyncStorage.removeItem("refreshToken");
-    router.replace("/"); // Or login screen
-  };
+  function isTokenExpired(token: string): boolean {
+    try {
+      const { exp } = jwtDecode<{ exp: number }>(token);
+      return Date.now() / 1000 > exp;
+    } catch {
+      return true;
+    }
+  }
 
   const refreshAccessToken = async (
     refreshToken: string
@@ -88,22 +57,34 @@ export default function AuthContextProvider({
       if (!response.ok) throw new Error("Refresh failed");
 
       const { token: newAccessToken } = await response.json();
-      await AsyncStorage.setItem("accessToken", newAccessToken);
-      setAccessToken(newAccessToken);
+
       return newAccessToken;
     } catch (err) {
-      logout(); // Force logout if refresh fails
       return null;
     }
   };
 
+  const authenticate = async (accessToken: string, refreshToken: string) => {
+    setAccessToken(accessToken);
+    setRefreshToken(refreshToken);
+    await AsyncStorage.setItem("accessToken", accessToken);
+    await AsyncStorage.setItem("refreshToken", refreshToken);
+  };
+
+  const logout = async () => {
+    setAccessToken(null);
+    await AsyncStorage.removeItem("accessToken");
+    await AsyncStorage.removeItem("refreshToken");
+    router.replace("/"); // Or login screen
+  };
+
   const authFetch = async (url: string, options: RequestInit = {}) => {
     let token = accessToken;
-    const refreshToken = await AsyncStorage.getItem("refreshToken");
+    const refToken = refreshToken;
 
     if (!token || isTokenExpired(token)) {
-      if (refreshToken) {
-        const newAccessToken = await refreshAccessToken(refreshToken);
+      if (refToken) {
+        const newAccessToken = await refreshAccessToken(refToken);
         if (!newAccessToken) {
           logout();
           throw new Error("Session expired");
@@ -111,8 +92,7 @@ export default function AuthContextProvider({
 
         // ✅ Update global state and local reference
         token = newAccessToken;
-        setAccessToken(token); // ← your context updater
-        await AsyncStorage.setItem("accessToken", token); // optional, for persistency
+        authenticate(newAccessToken, refToken);
       } else {
         logout();
         throw new Error("No refresh token available");
