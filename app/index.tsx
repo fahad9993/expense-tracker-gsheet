@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Image,
   View,
@@ -8,10 +8,11 @@ import {
   Alert,
   TouchableOpacity,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { Stack, useRootNavigationState, useRouter } from "expo-router";
 import { AuthContext } from "@/context/AuthContext";
 import { FontAwesome } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const Index = () => {
   const [username, setUsername] = useState(""); // State for username
@@ -21,6 +22,16 @@ const Index = () => {
 
   const authCtx = useContext(AuthContext);
   const router = useRouter();
+  const rootNavigationState = useRootNavigationState();
+
+  useEffect(() => {
+    if (!rootNavigationState?.key) return; // ⏳ Wait for layout to be ready
+    if (authCtx.isAuthenticated) {
+      router.replace("/home"); // Fallback (shouldn't hit this)
+    }
+  }, [authCtx.isAuthenticated, rootNavigationState]);
+
+  // if (authCtx.isAuthenticated) return <LoadingScreen />;
 
   const handleLogin = async () => {
     if (isLoggingIn) return;
@@ -60,6 +71,7 @@ const Index = () => {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
       <Image
         style={styles.image}
         source={require("../assets/adaptive-icon.png")}
