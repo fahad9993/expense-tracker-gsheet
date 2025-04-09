@@ -1,11 +1,10 @@
 import { createContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
 import { jwtDecode } from "jwt-decode";
 
 interface AuthContextType {
   accessToken: string | null;
-  isAuthenticated: boolean;
+  isAuthenticated: boolean | null;
   authenticate: (accessToken: string, refreshToken: string) => void;
   logout: () => void;
   authFetch: (url: string, options?: RequestInit) => Promise<Response>;
@@ -17,7 +16,7 @@ interface AuthContextProviderProps {
 
 export const AuthContext = createContext<AuthContextType>({
   accessToken: null,
-  isAuthenticated: false,
+  isAuthenticated: null,
   authenticate: () => {},
   logout: () => {},
   authFetch: async () => {
@@ -30,7 +29,7 @@ export default function AuthContextProvider({
 }: AuthContextProviderProps) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
-  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   function isTokenExpired(token: string): boolean {
     try {
@@ -67,15 +66,17 @@ export default function AuthContextProvider({
   const authenticate = async (accessToken: string, refreshToken: string) => {
     setAccessToken(accessToken);
     setRefreshToken(refreshToken);
+    setIsAuthenticated(true);
     await AsyncStorage.setItem("accessToken", accessToken);
     await AsyncStorage.setItem("refreshToken", refreshToken);
   };
 
   const logout = async () => {
     setAccessToken(null);
+    setRefreshToken(null);
+    setIsAuthenticated(false);
     await AsyncStorage.removeItem("accessToken");
     await AsyncStorage.removeItem("refreshToken");
-    router.replace("/"); // Or login screen
   };
 
   const authFetch = async (url: string, options: RequestInit = {}) => {
@@ -112,7 +113,7 @@ export default function AuthContextProvider({
     <AuthContext.Provider
       value={{
         accessToken,
-        isAuthenticated: !!accessToken,
+        isAuthenticated,
         authenticate,
         logout,
         authFetch,
