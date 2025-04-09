@@ -9,10 +9,10 @@ import {
   ActivityIndicator,
   StatusBar,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+
 import BankNoteCard from "@/components/BankNoteCard";
 import CustomButton from "@/components/CustomButton";
 import { AuthContext } from "@/context/AuthContext";

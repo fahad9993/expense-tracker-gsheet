@@ -1,7 +1,8 @@
-import { AuthContext } from "@/context/AuthContext";
 import { useContext } from "react";
 import { View, Text, Button, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+
+import { AuthContext } from "@/context/AuthContext";
 
 export default function Logout() {
   const authCtx = useContext(AuthContext);

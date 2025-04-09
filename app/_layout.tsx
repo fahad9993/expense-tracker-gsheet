@@ -2,16 +2,15 @@ import { StatusBar } from "expo-status-bar";
 import { useContext, useEffect, useState } from "react";
 import { Stack } from "expo-router/stack";
 import { useRouter } from "expo-router";
-
-import AuthContextProvider, { AuthContext } from "@/context/AuthContext";
-import LoadingScreen from "@/components/LoadingScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { jwtDecode } from "jwt-decode";
+
+import LoadingScreen from "@/components/LoadingScreen";
+import AuthContextProvider, { AuthContext } from "@/context/AuthContext";
+import { isTokenExpired, refreshAccessToken } from "@/utils/auth";
 
 function Layout() {
   const authCtx = useContext(AuthContext);
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadTokens = async () => {
@@ -53,38 +52,6 @@ function Layout() {
   if (authCtx.isAuthenticated === null) {
     return <LoadingScreen />;
   }
-
-  function isTokenExpired(token: string): boolean {
-    try {
-      const { exp } = jwtDecode<{ exp: number }>(token);
-      return Date.now() / 1000 > exp;
-    } catch {
-      return true;
-    }
-  }
-
-  const refreshAccessToken = async (
-    refreshToken: string
-  ): Promise<string | null> => {
-    try {
-      const response = await fetch(
-        "https://expense-tracker-gsheet.onrender.com/refreshToken",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ refreshToken: refreshToken }),
-        }
-      );
-
-      if (!response.ok) throw new Error("Refresh failed");
-
-      const { token: newAccessToken } = await response.json();
-
-      return newAccessToken;
-    } catch (err) {
-      return null;
-    }
-  };
 
   return (
     <>

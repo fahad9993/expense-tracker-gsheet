@@ -9,9 +9,10 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { AuthContext } from "@/context/AuthContext";
 import { FontAwesome } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
+
+import { AuthContext } from "@/context/AuthContext";
 
 const Index = () => {
   const [username, setUsername] = useState(""); // State for username

@@ -1,6 +1,7 @@
-import { createContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useState, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { jwtDecode } from "jwt-decode";
+
+import { isTokenExpired, refreshAccessToken } from "@/utils/auth";
 
 interface AuthContextType {
   accessToken: string | null;
@@ -30,38 +31,6 @@ export default function AuthContextProvider({
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-
-  function isTokenExpired(token: string): boolean {
-    try {
-      const { exp } = jwtDecode<{ exp: number }>(token);
-      return Date.now() / 1000 > exp;
-    } catch {
-      return true;
-    }
-  }
-
-  const refreshAccessToken = async (
-    refreshToken: string
-  ): Promise<string | null> => {
-    try {
-      const response = await fetch(
-        "https://expense-tracker-gsheet.onrender.com/refreshToken",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ refreshToken: refreshToken }),
-        }
-      );
-
-      if (!response.ok) throw new Error("Refresh failed");
-
-      const { token: newAccessToken } = await response.json();
-
-      return newAccessToken;
-    } catch (err) {
-      return null;
-    }
-  };
 
   const authenticate = async (accessToken: string, refreshToken: string) => {
     setAccessToken(accessToken);
