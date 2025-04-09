@@ -33,6 +33,8 @@ function Layout() {
     const loadTokens = async () => {
       const storedAccessToken = await AsyncStorage.getItem("accessToken");
       const storedRefreshToken = await AsyncStorage.getItem("refreshToken");
+      console.log("storedAccessToken", storedAccessToken);
+      console.log("storedRefreshToken", storedRefreshToken);
 
       if (
         storedAccessToken &&
