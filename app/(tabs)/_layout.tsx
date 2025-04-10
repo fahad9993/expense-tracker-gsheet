@@ -1,9 +1,8 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Tabs, useRouter } from "expo-router";
+import { Tabs } from "expo-router";
 
 export default function TabLayout() {
-  const router = useRouter(); // Access router for navigation
   return (
     <Tabs screenOptions={{ tabBarActiveTintColor: "green" }}>
       <Tabs.Screen

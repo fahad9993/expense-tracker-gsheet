@@ -6,7 +6,6 @@ import {
   FlatList,
   Pressable,
   Alert,
-  ActivityIndicator,
   StatusBar,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -16,6 +15,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import BankNoteCard from "@/components/BankNoteCard";
 import CustomButton from "@/components/CustomButton";
 import { AuthContext } from "@/context/AuthContext";
+import BankNoteSkeleton from "@/components/BankNoteSkeleton";
 
 export default function Home() {
   const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
@@ -111,7 +111,8 @@ export default function Home() {
         </View>
         {loading ? (
           <View style={styles.initialLoader}>
-            <ActivityIndicator size="large" color="green" />
+            {/* Show skeleton loader when data is loading */}
+            <BankNoteSkeleton />
           </View>
         ) : (
           <>
@@ -168,7 +169,8 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   headerContainer: {
-    flex: 1,
+    alignItems: "center",
+    marginBottom: 30,
   },
   heading: {
     fontSize: 20,
@@ -176,13 +178,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   initialLoader: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "flex-start",
+    alignItems: "stretch",
+    marginTop: 10,
   },
   sync: {
     position: "absolute",
