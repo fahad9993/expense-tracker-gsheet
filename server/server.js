@@ -127,6 +127,46 @@ app.post(
   }
 );
 
+app.post(
+  "/appendJournalEntry",
+  authenticateToken,
+  express.json(),
+  async (req, res) => {
+    try {
+      const { date, account, amount, note } = req.body;
+
+      if (!date || !account || !amount) {
+        return res.status(400).send("Missing required fields");
+      }
+
+      // Authenticate
+      const jwt = new JWT({
+        email: process.env.CLIENT_EMAIL,
+        key: process.env.PRIVATE_KEY.replace(/\\n/g, "\n"),
+        scopes: SCOPES,
+      });
+
+      const doc = new GoogleSpreadsheet(SPREADSHEET_ID, jwt);
+
+      await doc.loadInfo();
+
+      const sheet = doc.sheetsByTitle["Journal"]; // Make sure sheet exists
+
+      await sheet.addRow({
+        A: date,
+        B: account,
+        C: amount,
+        D: note,
+      });
+
+      res.status(200).send("Journal entry added successfully");
+    } catch (error) {
+      console.error("Error appending journal entry:", error);
+      res.status(500).send("Failed to append journal entry");
+    }
+  }
+);
+
 app.post("/refreshToken", express.json(), (req, res) => {
   const { refreshToken } = req.body;
 
