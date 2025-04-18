@@ -15,6 +15,7 @@ import Feather from "@expo/vector-icons/Feather";
 import { AuthContext } from "@/context/AuthContext";
 
 const Index = () => {
+  const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
   const [username, setUsername] = useState(""); // State for username
   const [password, setPassword] = useState(""); // State for password
   const [showPassword, setShowPassword] = useState(false);
@@ -28,14 +29,11 @@ const Index = () => {
     setIsLoggingIn(true);
 
     try {
-      const response = await fetch(
-        "https://expense-tracker-gsheet.onrender.com/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password }),
-        }
-      );
+      const response = await fetch(`${apiEndpoint}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
       if (response.ok) {
         const data = await response.json();

@@ -1,4 +1,4 @@
-//require("dotenv").config({ path: "../.env.local" });
+require("dotenv").config();
 
 const express = require("express");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
@@ -139,7 +139,6 @@ app.post(
         return res.status(400).send("Missing required fields");
       }
 
-      // Authenticate
       const jwt = new JWT({
         email: process.env.CLIENT_EMAIL,
         key: process.env.PRIVATE_KEY.replace(/\\n/g, "\n"),
@@ -147,16 +146,16 @@ app.post(
       });
 
       const doc = new GoogleSpreadsheet(SPREADSHEET_ID, jwt);
-
       await doc.loadInfo();
 
-      const sheet = doc.sheetsByTitle["Journal"]; // Make sure sheet exists
+      const sheet = doc.sheetsByTitle["Journal"];
+      await sheet.loadHeaderRow(3);
 
       await sheet.addRow({
-        A: date,
-        B: account,
-        C: amount,
-        D: note,
+        Date: date,
+        Account: account,
+        Amount: amount,
+        Notes: note,
       });
 
       res.status(200).send("Journal entry added successfully");
@@ -189,6 +188,44 @@ app.post("/refreshToken", express.json(), (req, res) => {
 
     res.json({ token: newAccessToken });
   });
+});
+
+app.get("/getSuggestions", authenticateToken, async (req, res) => {
+  try {
+    const jwtClient = new JWT({
+      email: process.env.CLIENT_EMAIL,
+      key: process.env.PRIVATE_KEY.replace(/\\n/g, "\n"),
+      scopes: SCOPES,
+    });
+
+    const doc = new GoogleSpreadsheet(SPREADSHEET_ID, jwtClient);
+    await doc.loadInfo();
+
+    const accountSheet = doc.sheetsByTitle["Accounts"]; // Sheet named "Accounts"
+    const rows = await accountSheet.getRows(); // rows[0] = A2, rows[1] = A3, etc.
+
+    // Get column A values from rows (starting from A2)
+    const accountNames = rows
+      .map((row) => row._rawData[0]) // Get column A
+      .filter((name) => !!name); // Remove empty cells
+
+    const foodNames = rows
+      .map((row) => row._rawData[2]) // Get column C
+      .filter((name) => !!name);
+
+    const OtherItems = rows
+      .map((row) => row._rawData[3]) // Get column D
+      .filter((name) => !!name);
+
+    res.json({
+      accounts: accountNames,
+      foodNames: foodNames,
+      otherItems: OtherItems,
+    });
+  } catch (error) {
+    console.error("Error fetching accounts:", error);
+    res.status(500).send("Failed to fetch account list");
+  }
 });
 
 app.listen(port, () => {
