@@ -383,6 +383,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 15,
     fontSize: 16,
+    color: "black",
   },
   label: {
     fontSize: 16,
