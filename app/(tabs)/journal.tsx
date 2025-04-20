@@ -70,6 +70,63 @@ export default function Journal() {
     fetchAccount();
   }, []);
 
+  const fetchExistingEntry = async () => {
+    try {
+      const response = await authCtx.authFetch(
+        `${apiEndpoint}/getJournalEntry?date=${encodeURIComponent(
+          dateText
+        )}&account=${encodeURIComponent(account)}`
+      );
+
+      const data = await response.json();
+      console.log(data);
+
+      if (response.ok && data) {
+        const notesArray =
+          data.Notes?.split(",").map((note: string) => note.trim()) || [];
+
+        let amountsArray: string[] = [];
+
+        if (data.Amount?.startsWith("=")) {
+          // Formula case: =40+30+10
+          amountsArray = data.Amount.replace(/^=/, "")
+            .split("+")
+            .map((amt: string) =>
+              amt
+                .replace(/[^0-9.]/g, "")
+                .replace(/\.00$/, "")
+                .trim()
+            );
+        } else {
+          // Single value case: "80" or "80.00"
+          const cleanAmount = data.Amount?.replace(/[^0-9.]/g, "")
+            .replace(/\.00$/, "")
+            .trim();
+
+          // Spread it equally across all notes (or just match first if unsure)
+          amountsArray = notesArray.map((_: string, i: number) =>
+            i === 0 ? cleanAmount || "0" : "0"
+          );
+        }
+
+        const fetchedItems: Item[] = notesArray.map(
+          (note: string, index: number) => ({
+            note,
+            amount: amountsArray[index] || "0",
+          })
+        );
+
+        if (fetchedItems.length > 1) {
+          fetchedItems.sort((a, b) => a.note.localeCompare(b.note));
+        }
+
+        setItems(fetchedItems);
+      }
+    } catch (error) {
+      console.error("Error fetching entry:", error);
+    }
+  };
+
   const toggleDatePicker = () => {
     setShowPicker(!showPicker);
   };
@@ -255,6 +312,7 @@ export default function Journal() {
             onBlur={() => {
               setIsAccountClicked(false);
               setAccountError(false);
+              fetchExistingEntry();
             }}
           />
           {isAccountClicked && (
@@ -295,6 +353,11 @@ export default function Journal() {
             value={note}
             onChangeText={onChangeTextNote}
             placeholder="e.g. Watermelon"
+            onFocus={() => {
+              if (account.trim() && dateText.trim()) {
+                fetchExistingEntry();
+              }
+            }}
           />
         </View>
         {note.length > 0 &&

@@ -150,21 +150,107 @@ app.post(
 
       const sheet = doc.sheetsByTitle["Journal"];
       await sheet.loadHeaderRow(3);
+      const rows = await sheet.getRows();
 
-      await sheet.addRow({
-        Date: date,
-        Account: account,
-        Amount: amount,
-        Notes: note,
+      // Helper to format the sheet date
+      const formatSheetDate = (sheetDate) => {
+        const d = new Date(sheetDate);
+        return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+      };
+
+      const targetDate = date.trim();
+      const targetAccount = account.trim().toLowerCase();
+
+      // Try to find an existing row
+      const existingRow = rows.find((row) => {
+        const rowDate = formatSheetDate(row.get("Date"));
+        const rowAccount = row.get("Account")?.toString().trim().toLowerCase();
+        return rowDate === targetDate && rowAccount === targetAccount;
       });
 
-      res.status(200).send("Journal entry added successfully");
+      if (existingRow) {
+        // Update existing row
+        existingRow.set("Amount", amount);
+        existingRow.set("Notes", note);
+        await existingRow.save();
+        return res.status(200).send("Journal entry updated successfully");
+      } else {
+        // Add new row if not found
+        await sheet.addRow({
+          Date: date,
+          Account: account,
+          Amount: amount,
+          Notes: note,
+        });
+        return res.status(200).send("Journal entry added successfully");
+      }
     } catch (error) {
-      console.error("Error appending journal entry:", error);
-      res.status(500).send("Failed to append journal entry");
+      console.error("Error appending or updating journal entry:", error);
+      return res.status(500).send("Failed to append or update journal entry");
     }
   }
 );
+
+app.get("/getJournalEntry", authenticateToken, async (req, res) => {
+  const { date, account } = req.query;
+
+  const formatSheetDate = (sheetDate) => {
+    const d = new Date(sheetDate);
+    return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+  };
+
+  if (!date || !account) {
+    return res.status(400).json({ error: "Missing required query parameters" });
+  }
+
+  try {
+    const jwt = new JWT({
+      email: process.env.CLIENT_EMAIL,
+      key: process.env.PRIVATE_KEY.replace(/\\n/g, "\n"),
+      scopes: SCOPES,
+    });
+
+    const doc = new GoogleSpreadsheet(SPREADSHEET_ID, jwt);
+    await doc.loadInfo();
+
+    const sheet = doc.sheetsByTitle["Journal"];
+    await sheet.loadHeaderRow(3);
+    const rows = await sheet.getRows();
+
+    const targetDate = date.trim();
+    const targetAccount = account.trim().toLowerCase();
+
+    const matchingRow = rows.find((row) => {
+      const rowDateRaw = row.get("Date");
+      const rowDate = formatSheetDate(rowDateRaw);
+      const rowAccount = row.get("Account")?.toString().trim().toLowerCase();
+
+      return rowDate === targetDate && rowAccount === targetAccount;
+    });
+
+    if (!matchingRow) {
+      return res.status(404).json({ message: "Entry not found" });
+    }
+
+    await sheet.loadCells(
+      `C${matchingRow.rowNumber}:C${matchingRow.rowNumber}`
+    );
+    const amountCell = sheet.getCellByA1(`C${matchingRow.rowNumber}`);
+    const amountFormula = amountCell.formula;
+
+    if (matchingRow) {
+      return res.status(200).json({
+        Notes: matchingRow.get("Notes") || "",
+        Amount: amountFormula ? amountFormula : matchingRow.get("Amount") || "",
+      });
+    } else {
+      return res.status(404).json({ message: "Entry not found" });
+    }
+  } catch (error) {
+    console.error("Error fetching journal entry:", error);
+    return res.status(500).json({ error: "Failed to fetch journal entry" });
+  }
+});
 
 app.post("/refreshToken", express.json(), (req, res) => {
   const { refreshToken } = req.body;
