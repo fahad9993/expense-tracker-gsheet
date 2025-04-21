@@ -16,7 +16,7 @@ export default function LoadingScreen() {
         }),
         Animated.sequence([
           Animated.timing(scaleAnim, {
-            toValue: 1.2,
+            toValue: 1.5,
             duration: 800,
             useNativeDriver: true,
           }),

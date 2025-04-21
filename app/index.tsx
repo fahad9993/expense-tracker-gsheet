@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Alert,
   TouchableOpacity,
+  Keyboard,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
@@ -27,7 +28,7 @@ const Index = () => {
   const handleLogin = async () => {
     if (isLoggingIn) return;
     setIsLoggingIn(true);
-
+    Keyboard.dismiss();
     try {
       const response = await fetch(`${apiEndpoint}/login`, {
         method: "POST",
