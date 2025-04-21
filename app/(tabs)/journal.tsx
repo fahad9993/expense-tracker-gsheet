@@ -87,22 +87,22 @@ export default function Journal() {
         let amountsArray: string[] = [];
 
         if (data.Amount?.startsWith("=")) {
-          // Formula case: =40+30+10
+          // Formula case
           amountsArray = data.Amount.replace(/^=/, "")
             .split("+")
             .map((amt: string) =>
               amt
-                .replace(/[^0-9.]/g, "")
-                .replace(/\.00$/, "")
+                .replace(/[^0-9.]/g, "") // Remove non-numeric (e.g., $)
+                .replace(/\.00$/, "") // Remove trailing .00
                 .trim()
             );
         } else {
-          // Single value case: "80" or "80.00"
+          // Single value case
           const cleanAmount = data.Amount?.replace(/[^0-9.]/g, "")
             .replace(/\.00$/, "")
             .trim();
 
-          // Spread it equally across all notes (or just match first if unsure)
+          // Assign value to first item, rest 0
           amountsArray = notesArray.map((_: string, i: number) =>
             i === 0 ? cleanAmount || "0" : "0"
           );
@@ -120,9 +120,12 @@ export default function Journal() {
         }
 
         setItems(fetchedItems);
+      } else {
+        setItems([]);
       }
     } catch (error) {
       console.error("Error fetching entry:", error);
+      setItems([]);
     }
   };
 

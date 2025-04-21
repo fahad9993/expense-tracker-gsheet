@@ -14,7 +14,14 @@ type Items = {
 export default function ItemsTable({ items, onRemoveItem }: Items) {
   const totalAmount = items.reduce((sum, item) => sum + Number(item.amount), 0);
   return (
-    <View style={{ flex: 1, marginTop: 15 }}>
+    <View
+      style={{
+        flex: 1,
+        marginTop: 15,
+        borderColor: "gray",
+        borderWidth: 1,
+      }}
+    >
       <FlatList
         data={items}
         keyExtractor={(_, index) => index.toString()}
