@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -51,6 +51,9 @@ export default function Journal() {
     string[]
   >([]);
   const [accountError, setAccountError] = useState(false);
+  const lastFetchedRef = useRef<{ account: string; dateText: string } | null>(
+    null
+  );
 
   useEffect(() => {
     const fetchAccount = async () => {
@@ -63,7 +66,7 @@ export default function Journal() {
         setFoodSuggestions(data.foodNames);
         setOtherSuggestions(data.otherItems);
       } catch (error) {
-        console.log("Failed to fetch accounts: ", error);
+        console.error("Failed to fetch accounts: ", error);
       }
     };
 
@@ -128,6 +131,19 @@ export default function Journal() {
       setItems([]);
     }
   };
+
+  useEffect(() => {
+    const shouldFetch =
+      account &&
+      dateText &&
+      (lastFetchedRef.current?.account !== account ||
+        lastFetchedRef.current?.dateText !== dateText);
+
+    if (shouldFetch) {
+      fetchExistingEntry();
+      lastFetchedRef.current = { account, dateText };
+    }
+  }, [dateText, account]);
 
   const toggleDatePicker = () => {
     setShowPicker(!showPicker);
@@ -314,7 +330,6 @@ export default function Journal() {
             onBlur={() => {
               setIsAccountClicked(false);
               setAccountError(false);
-              fetchExistingEntry();
             }}
           />
           {isAccountClicked && (
@@ -355,11 +370,6 @@ export default function Journal() {
             value={note}
             onChangeText={onChangeTextNote}
             placeholder="e.g. Watermelon"
-            onFocus={() => {
-              if (account.trim() && dateText.trim()) {
-                fetchExistingEntry();
-              }
-            }}
           />
         </View>
         {note.length > 0 &&
