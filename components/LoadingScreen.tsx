@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, Animated, Easing } from "react-native";
 import { useEffect, useRef } from "react";
+import { View, Text, StyleSheet, Animated, Easing } from "react-native";
 
 export default function LoadingScreen() {
   const spinAnim = useRef(new Animated.Value(0)).current;

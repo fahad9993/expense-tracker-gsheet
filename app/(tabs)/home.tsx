@@ -15,7 +15,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import BankNoteCard from "@/components/BankNoteCard";
 import CustomButton from "@/components/CustomButton";
 import { AuthContext } from "@/context/AuthContext";
-import BankNoteSkeleton from "@/components/BankNoteSkeleton";
+import BankNoteSkeleton from "@/components/LoadingSkeleton/BankNoteSkeleton";
 
 export default function Home() {
   const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
@@ -27,7 +27,7 @@ export default function Home() {
 
   // Function to fetch the data from the server
   const fetchData = async () => {
-    setLoading(true);
+    // setLoading(true);
     try {
       const response = await authCtx.authFetch(
         `${apiEndpoint}/fetchQuantities`
@@ -147,9 +147,13 @@ export default function Home() {
               <CustomButton
                 handlePress={handleResetAll}
                 title="Reset all"
-                buttonStyle={{ backgroundColor: "red" }}
+                buttonStyle={{ backgroundColor: "red", flexGrow: 1 }}
               />
-              <CustomButton handlePress={handleUpdate} title="Update" />
+              <CustomButton
+                handlePress={handleUpdate}
+                title="Update"
+                buttonStyle={{ flexGrow: 1 }}
+              />
             </View>
           </>
         )}

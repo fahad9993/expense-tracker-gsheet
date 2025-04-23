@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { Stack } from "expo-router/stack";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -41,7 +41,7 @@ function Layout() {
 
   useEffect(() => {
     if (authCtx.isAuthenticated === true) {
-      router.replace("/home");
+      router.replace("/dashboard");
     } else if (authCtx.isAuthenticated === false) {
       router.replace("/");
     }

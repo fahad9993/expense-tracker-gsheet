@@ -314,6 +314,101 @@ app.get("/getSuggestions", authenticateToken, async (req, res) => {
   }
 });
 
+app.get("/getDashboardInfo", authenticateToken, async (req, res) => {
+  try {
+    const jwtClient = new JWT({
+      email: process.env.CLIENT_EMAIL,
+      key: process.env.PRIVATE_KEY.replace(/\\n/g, "\n"),
+      scopes: SCOPES,
+    });
+
+    const doc = new GoogleSpreadsheet(SPREADSHEET_ID, jwtClient);
+    await doc.loadInfo();
+
+    // Access the "Net Income" sheet
+    const accountSheet = doc.sheetsByTitle["Net Income"];
+
+    // Load all cells
+    await accountSheet.loadCells();
+
+    // Get values from column P (index 15) for rows 2 to 5
+    const amounts = [];
+    for (let i = 1; i <= 4; i++) {
+      const cell = accountSheet.getCell(i, 15); // Row i, Column 15 (P)
+      amounts.push(cell.value);
+    }
+
+    const variance = accountSheet.getCell(18, 10).value;
+
+    const reportSheet = doc.sheetsByTitle["Reports of Accounts"];
+    await reportSheet.loadCells();
+
+    const pieLabels = [];
+    const pieValues = [];
+
+    for (let i = 17; i <= 29; i++) {
+      // B18:B30 and O18:O30
+      const label = reportSheet.getCell(i, 1).value; // B column (1-based index)
+      const value = reportSheet.getCell(i, 14).value; // O column (1-based index)
+      if (label && value !== null) {
+        pieLabels.push(label);
+        pieValues.push(value);
+      }
+    }
+
+    res.json({
+      amounts,
+      variance,
+      pieChart: {
+        labels: pieLabels,
+        values: pieValues,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching dashboard info:", error);
+    res.status(500).send("Failed to fetch account data");
+  }
+});
+
+app.post(
+  "/updateDashboardInfo",
+  authenticateToken,
+  express.json(),
+  async (req, res) => {
+    try {
+      const { amounts } = req.body;
+
+      if (!Array.isArray(amounts) || amounts.length !== 4) {
+        return res.status(400).send("Invalid or missing amounts");
+      }
+
+      const jwtClient = new JWT({
+        email: process.env.CLIENT_EMAIL,
+        key: process.env.PRIVATE_KEY.replace(/\\n/g, "\n"),
+        scopes: SCOPES,
+      });
+
+      const doc = new GoogleSpreadsheet(SPREADSHEET_ID, jwtClient);
+      await doc.loadInfo();
+
+      const accountSheet = doc.sheetsByTitle["Net Income"];
+      await accountSheet.loadCells();
+
+      for (let i = 1; i <= 3; i++) {
+        const cell = accountSheet.getCell(i, 15); // Row i, Column P (index 15)
+        cell.value = amounts[i - 1];
+      }
+
+      await accountSheet.saveUpdatedCells();
+
+      res.json({ message: "Dashboard updated successfully" });
+    } catch (error) {
+      console.error("Error updating dashboard info:", error);
+      res.status(500).send("Failed to update dashboard info");
+    }
+  }
+);
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

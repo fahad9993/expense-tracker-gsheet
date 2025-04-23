@@ -1,14 +1,25 @@
+import { Tabs } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Tabs } from "expo-router";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 export default function TabLayout() {
   return (
     <Tabs screenOptions={{ tabBarActiveTintColor: "green" }}>
       <Tabs.Screen
-        name="home"
+        name="dashboard"
         options={{
           title: "Home",
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="dashboard" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="home"
+        options={{
+          title: "Cash",
           headerShown: false,
           tabBarIcon: ({ color }) => (
             <FontAwesome size={24} name="home" color={color} />

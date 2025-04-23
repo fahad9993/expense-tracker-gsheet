@@ -17,8 +17,8 @@ import { AuthContext } from "@/context/AuthContext";
 
 const Index = () => {
   const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
-  const [username, setUsername] = useState(""); // State for username
-  const [password, setPassword] = useState(""); // State for password
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -43,7 +43,7 @@ const Index = () => {
 
         if (token && refreshToken) {
           authCtx.authenticate(token, refreshToken);
-          router.replace("/home");
+          router.replace("/dashboard");
         } else {
           Alert.alert("Login Failed", "Invalid response from server");
         }
