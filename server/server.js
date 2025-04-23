@@ -345,14 +345,19 @@ app.get("/getDashboardInfo", authenticateToken, async (req, res) => {
 
     const pieLabels = [];
     const pieValues = [];
+    const pieValuesCurrentMonth = [];
+
+    const currentMonth = new Date().getMonth();
 
     for (let i = 17; i <= 29; i++) {
       // B18:B30 and O18:O30
       const label = reportSheet.getCell(i, 1).value; // B column (1-based index)
       const value = reportSheet.getCell(i, 14).value; // O column (1-based index)
-      if (label && value !== null) {
+      const valueMonth = reportSheet.getCell(i, currentMonth + 2).value;
+      if (label && value !== null && valueMonth !== null) {
         pieLabels.push(label);
         pieValues.push(value);
+        pieValuesCurrentMonth.push(valueMonth);
       }
     }
 
@@ -362,6 +367,7 @@ app.get("/getDashboardInfo", authenticateToken, async (req, res) => {
       pieChart: {
         labels: pieLabels,
         values: pieValues,
+        currentValues: pieValuesCurrentMonth,
       },
     });
   } catch (error) {

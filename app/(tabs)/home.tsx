@@ -18,7 +18,8 @@ import { AuthContext } from "@/context/AuthContext";
 import BankNoteSkeleton from "@/components/LoadingSkeleton/BankNoteSkeleton";
 
 export default function Home() {
-  const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
+  // const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
+  const apiEndpoint = "http://192.168.0.112:3000";
   const [bankNotes, setBankNotes] = useState<number[]>([]);
   const [quantities, setQuantities] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);

@@ -1,12 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import { View, StyleSheet, Text, FlatList, Pressable } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Text,
+  FlatList,
+  Pressable,
+  Button,
+} from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 
 import { formatBDNumber } from "@/utils/functions";
+import CustomButton from "./CustomButton";
 
 type pieProps = {
   accountName: string;
   amount: number;
+  currentAmount: number;
 };
 
 type Props = {
@@ -38,18 +47,19 @@ export default function PieChartComponent({ pieData }: Props) {
   ];
 
   const [data, setData] = useState<Data[]>([]);
+  const [showMonthly, setShowMonthly] = useState(false);
 
   useEffect(() => {
     if (pieData && pieData.length > 0) {
       const transformed = pieData.map((item, index) => ({
         text: item.accountName,
-        value: item.amount,
+        value: showMonthly ? item.currentAmount : item.amount,
         color: colors[index],
         focused: false,
       }));
       setData(transformed);
     }
-  }, [pieData]);
+  }, [pieData, showMonthly]);
 
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
@@ -72,7 +82,15 @@ export default function PieChartComponent({ pieData }: Props) {
   };
 
   return (
-    <View style={{ flex: 1, marginTop: 40, alignItems: "center" }}>
+    <View style={{ flex: 1, marginTop: 20, alignItems: "center" }}>
+      <Pressable
+        onPress={() => setShowMonthly(!showMonthly)}
+        style={styles.button}
+      >
+        <Text style={styles.buttonText}>
+          {showMonthly ? "Show Yearly" : "Show Monthly"}
+        </Text>
+      </Pressable>
       <PieChart
         donut
         radius={150}
@@ -104,8 +122,7 @@ export default function PieChartComponent({ pieData }: Props) {
         }}
         data={data}
         keyExtractor={(item, index) => index.toString()}
-        style={{ marginTop: 10, maxHeight: 200, width: "100%" }}
-        contentContainerStyle={{ paddingHorizontal: 10 }}
+        style={{ marginTop: 10, maxHeight: "auto", width: "100%" }}
         renderItem={({ item, index }) => (
           <View
             style={[
@@ -161,4 +178,15 @@ export default function PieChartComponent({ pieData }: Props) {
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  button: {
+    borderRadius: 5,
+    backgroundColor: "green",
+    padding: 5,
+    marginBottom: 10,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+  },
+});

@@ -16,7 +16,8 @@ import Feather from "@expo/vector-icons/Feather";
 import { AuthContext } from "@/context/AuthContext";
 
 const Index = () => {
-  const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
+  // const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
+  const apiEndpoint = "http://192.168.0.112:3000";
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);

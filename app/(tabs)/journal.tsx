@@ -27,7 +27,8 @@ export default function Journal() {
     return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
   };
 
-  const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
+  // const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
+  const apiEndpoint = "http://192.168.0.112:3000";
 
   const authCtx = useContext(AuthContext);
   const [isAccountClicked, setIsAccountClicked] = useState(false);
