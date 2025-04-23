@@ -10,8 +10,7 @@ import { AuthContext } from "@/context/AuthContext";
 import DashboardSkeleton from "@/components/LoadingSkeleton/DashboardSkeleton";
 
 export default function Dashboard() {
-  // const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
-  const apiEndpoint = "http://192.168.0.112:3000";
+  const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
   const [amounts, setAmounts] = useState<number[]>([0, 0, 0, 0]);
   const [modalVisible, setModalVisible] = useState(false);
   const [curentIndex, setCurrentIndex] = useState<number | null>(null);
