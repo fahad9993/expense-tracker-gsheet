@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -16,12 +16,15 @@ import BankNoteCard from "@/components/BankNoteCard";
 import CustomButton from "@/components/CustomButton";
 import { AuthContext } from "@/context/AuthContext";
 import BankNoteSkeleton from "@/components/LoadingSkeleton/BankNoteSkeleton";
+import { arraysAreEqual } from "@/utils/functions";
 
 export default function Home() {
   const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
   const [bankNotes, setBankNotes] = useState<number[]>([]);
   const [quantities, setQuantities] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const lastSavedQuantities = useRef(quantities);
 
   const authCtx = useContext(AuthContext);
 
@@ -75,6 +78,10 @@ export default function Home() {
   };
 
   const handleUpdate = async () => {
+    if (arraysAreEqual(lastSavedQuantities.current, quantities)) {
+      Alert.alert("Warning!", "Quantities not changed.");
+      return;
+    }
     try {
       await authCtx.authFetch(`${apiEndpoint}/updateQuantities`, {
         method: "POST",
@@ -92,6 +99,8 @@ export default function Home() {
       Alert.alert("Error", "Failed to update quantities. Please try again.", [
         { text: "OK" },
       ]);
+    } finally {
+      lastSavedQuantities.current = [...quantities];
     }
   };
 
@@ -147,12 +156,16 @@ export default function Home() {
               <CustomButton
                 handlePress={handleResetAll}
                 title="Reset all"
-                buttonStyle={{ backgroundColor: "red", flexGrow: 1 }}
+                buttonStyle={{
+                  backgroundColor: "red",
+                  flexGrow: 1,
+                  marginTop: 20,
+                }}
               />
               <CustomButton
                 handlePress={handleUpdate}
                 title="Update"
-                buttonStyle={{ flexGrow: 1 }}
+                buttonStyle={{ flexGrow: 1, marginTop: 20 }}
               />
             </View>
           </>

@@ -8,6 +8,7 @@ import CustomButton from "@/components/CustomButton";
 import PieChart from "@/components/PieChart";
 import { AuthContext } from "@/context/AuthContext";
 import DashboardSkeleton from "@/components/LoadingSkeleton/DashboardSkeleton";
+import { arraysAreEqual } from "@/utils/functions";
 
 export default function Dashboard() {
   const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
@@ -30,9 +31,6 @@ export default function Dashboard() {
     currentAmount: number;
   };
   const [pieData, setPieData] = useState<pieProps[]>([]);
-
-  const arraysAreEqual = (a: number[], b: number[]) =>
-    a.length === b.length && a.every((val, i) => val === b[i]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -281,7 +279,7 @@ const styles = StyleSheet.create({
   },
   variance: {
     width: "100%",
-    marginVertical: 10,
+    marginTop: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     borderWidth: 1,

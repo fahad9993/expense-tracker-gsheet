@@ -10,3 +10,6 @@ export const formatBDNumber = (value: number) => {
 
   return formattedRest + "," + lastThree;
 };
+
+export const arraysAreEqual = (a: number[], b: number[]) =>
+  a.length === b.length && a.every((val, i) => val === b[i]);

@@ -425,8 +425,8 @@ export default function Journal() {
 
         <CustomButton
           handlePress={handleAdd}
-          title="Add"
-          buttonStyle={{ flexGrow: 0 }}
+          title="Submit"
+          buttonStyle={{ marginTop: 20 }}
         />
       </SafeAreaView>
     </SafeAreaProvider>

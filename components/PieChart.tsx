@@ -1,12 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  View,
-  StyleSheet,
-  Text,
-  FlatList,
-  Pressable,
-  Button,
-} from "react-native";
+import { View, StyleSheet, Text, FlatList, Pressable } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 
 import { formatBDNumber } from "@/utils/functions";
@@ -83,14 +76,11 @@ export default function PieChartComponent({ pieData }: Props) {
 
   return (
     <View style={{ flex: 1, marginTop: 20, alignItems: "center" }}>
-      <Pressable
-        onPress={() => setShowMonthly(!showMonthly)}
-        style={styles.button}
-      >
-        <Text style={styles.buttonText}>
-          {showMonthly ? "Show Yearly" : "Show Monthly"}
-        </Text>
-      </Pressable>
+      <CustomButton
+        title={showMonthly ? "Show Yearly" : "Show Monthly"}
+        handlePress={() => setShowMonthly(!showMonthly)}
+        buttonStyle={styles.button}
+      />
       <PieChart
         donut
         radius={150}
@@ -180,13 +170,7 @@ export default function PieChartComponent({ pieData }: Props) {
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 5,
-    backgroundColor: "green",
-    padding: 5,
     marginBottom: 10,
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
+    width: "50%",
   },
 });
