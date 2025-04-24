@@ -7,6 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoadingScreen from "@/components/LoadingScreen";
 import AuthContextProvider, { AuthContext } from "@/context/AuthContext";
 import { isTokenExpired, refreshAccessToken } from "@/utils/auth";
+import RefetchProvider from "@/context/RefetchContext";
 
 function Layout() {
   const authCtx = useContext(AuthContext);
@@ -63,7 +64,9 @@ function Layout() {
 export default function RootLayout() {
   return (
     <AuthContextProvider>
-      <Layout />
+      <RefetchProvider>
+        <Layout />
+      </RefetchProvider>
     </AuthContextProvider>
   );
 }

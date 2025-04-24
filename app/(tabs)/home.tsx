@@ -17,6 +17,7 @@ import CustomButton from "@/components/CustomButton";
 import { AuthContext } from "@/context/AuthContext";
 import BankNoteSkeleton from "@/components/LoadingSkeleton/BankNoteSkeleton";
 import { arraysAreEqual } from "@/utils/functions";
+import { useRefetch } from "@/context/RefetchContext";
 
 export default function Home() {
   const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
@@ -27,6 +28,7 @@ export default function Home() {
   const lastSavedQuantities = useRef(quantities);
 
   const authCtx = useContext(AuthContext);
+  const { setNeedsRefetch } = useRefetch();
 
   // Function to fetch the data from the server
   const fetchData = async () => {
@@ -101,6 +103,7 @@ export default function Home() {
       ]);
     } finally {
       lastSavedQuantities.current = [...quantities];
+      setNeedsRefetch(true);
     }
   };
 

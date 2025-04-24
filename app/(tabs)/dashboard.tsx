@@ -1,7 +1,8 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { View, StyleSheet, Modal, Text, TextInput, Alert } from "react-native";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 
 import AgentAmount from "@/components/AgentAmount";
 import CustomButton from "@/components/CustomButton";
@@ -9,6 +10,7 @@ import PieChart from "@/components/PieChart";
 import { AuthContext } from "@/context/AuthContext";
 import DashboardSkeleton from "@/components/LoadingSkeleton/DashboardSkeleton";
 import { arraysAreEqual } from "@/utils/functions";
+import { useRefetch } from "@/context/RefetchContext";
 
 export default function Dashboard() {
   const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
@@ -21,6 +23,8 @@ export default function Dashboard() {
   const authCtx = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(true);
 
+  const { needsRefetch, setNeedsRefetch } = useRefetch();
+
   const headers = ["Nagad", "bKash", "Rocket", "Cash"];
   const router = useRouter();
   const lastSavedAmount = useRef(amounts);
@@ -32,41 +36,50 @@ export default function Dashboard() {
   };
   const [pieData, setPieData] = useState<pieProps[]>([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await authCtx.authFetch(
-          `${apiEndpoint}/getDashboardInfo`
+  const fetchData = useCallback(async () => {
+    try {
+      const response = await authCtx.authFetch(
+        `${apiEndpoint}/getDashboardInfo`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        const sanitizedAmounts = data.amounts.map((amount: number) =>
+          amount !== null ? amount : 0
         );
-        if (response.ok) {
-          const data = await response.json();
-          const sanitizedAmounts = data.amounts.map((amount: number) =>
-            amount !== null ? amount : 0
-          );
-          setAmounts(sanitizedAmounts);
-          lastSavedAmount.current = sanitizedAmounts;
-          setVariance(data.variance);
-          const pieFormatted = data.pieChart.labels.map(
-            (label: string, i: number) => ({
-              accountName: label,
-              amount: data.pieChart.values[i],
-              currentAmount: data.pieChart.currentValues[i],
-            })
-          );
-
-          setPieData(pieFormatted);
-        } else {
-          console.error("Failed to fetch data:", response.statusText);
-        }
-      } catch (error) {
-        console.error("Error fetching data: ", error);
-      } finally {
-        setIsLoading(false);
+        setAmounts(sanitizedAmounts);
+        lastSavedAmount.current = sanitizedAmounts;
+        setVariance(data.variance);
+        const pieFormatted = data.pieChart.labels.map(
+          (label: string, i: number) => ({
+            accountName: label,
+            amount: data.pieChart.values[i],
+            currentAmount: data.pieChart.currentValues[i],
+          })
+        );
+        setPieData(pieFormatted);
+      } else {
+        console.error("Failed to fetch data:", response.statusText);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [authCtx]);
 
+  useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (needsRefetch) {
+        setIsLoading(true);
+        fetchData();
+        setNeedsRefetch(false);
+      }
+    }, [needsRefetch, fetchData])
+  );
 
   const handlePress = (index: number) => {
     setCurrentIndex(index);
@@ -214,12 +227,12 @@ export default function Dashboard() {
                     setModalVisible(false);
                     setNewAmount("");
                   }}
-                  buttonStyle={{ backgroundColor: "red", flexGrow: 1 }}
+                  buttonStyle={{ backgroundColor: "red", flex: 1 }}
                 />
                 <CustomButton
                   title="Save"
                   handlePress={handleSave}
-                  buttonStyle={{ flexGrow: 1 }}
+                  buttonStyle={{ flex: 1 }}
                 />
               </View>
             </View>
