@@ -1,4 +1,4 @@
-import { StatusBar } from "expo-status-bar";
+import { StatusBar } from "react-native";
 import { useContext, useEffect } from "react";
 import { Stack } from "expo-router/stack";
 import { useRouter } from "expo-router";
@@ -8,6 +8,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import AuthContextProvider, { AuthContext } from "@/context/AuthContext";
 import { isTokenExpired, refreshAccessToken } from "@/utils/auth";
 import RefetchProvider from "@/context/RefetchContext";
+import { Colors } from "@/utils/colors";
 
 function Layout() {
   const authCtx = useContext(AuthContext);
@@ -54,7 +55,7 @@ function Layout() {
 
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar backgroundColor={Colors.login} barStyle={"dark-content"} />
       <Stack screenOptions={{ headerShown: false }} />
     </>
   );

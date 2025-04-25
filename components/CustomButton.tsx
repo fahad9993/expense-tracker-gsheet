@@ -5,7 +5,10 @@ import {
   StyleProp,
   ViewStyle,
   TextStyle,
+  LayoutChangeEvent,
 } from "react-native";
+
+import { Colors } from "@/utils/colors";
 
 type buttonProps = {
   handlePress: () => void;
@@ -38,7 +41,7 @@ export default function CustomButton({
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: "green",
+    backgroundColor: Colors.primary,
     color: "white",
     padding: 10,
     borderRadius: 20,

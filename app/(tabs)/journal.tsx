@@ -16,6 +16,7 @@ import CustomButton from "@/components/CustomButton";
 import { AuthContext } from "@/context/AuthContext";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import ItemsTable from "@/components/ItemsTable";
+import { Colors } from "@/utils/colors";
 
 type Item = {
   note: string;
@@ -233,7 +234,7 @@ export default function Journal() {
     setItems((prevItems) => prevItems.filter((_, i) => i !== index));
   };
 
-  const handleAdd = async () => {
+  const handleSubmit = async () => {
     if (!accountSuggestions.includes(account)) {
       setAccountError(true);
       return;
@@ -245,23 +246,30 @@ export default function Journal() {
       items.map((item) => item.amount).join("+");
 
     try {
-      await authCtx.authFetch(`${apiEndpoint}/appendJournalEntry`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          date: dateText,
-          account: account,
-          amount: items.length !== 0 ? combinedAmounts.trim() : amount.trim(),
-          note: items.length !== 0 ? combinedNotes.trim() : note.trim(),
-        }),
-      });
+      const response = await authCtx.authFetch(
+        `${apiEndpoint}/appendJournalEntry`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            date: dateText,
+            account: account,
+            amount: items.length !== 0 ? combinedAmounts.trim() : amount.trim(),
+            note: items.length !== 0 ? combinedNotes.trim() : note.trim(),
+          }),
+        }
+      );
 
-      Alert.alert("Success!", "Journal entry added successfully.", [
-        { text: "Ok" },
-      ]);
-      setItems([]);
+      if (response.ok) {
+        Alert.alert("Success!", "Journal entry added successfully.", [
+          { text: "Ok" },
+        ]);
+        setItems([]);
+      } else {
+        Alert.alert("Error!", "Failed to add data.");
+      }
     } catch (error) {
       console.error("Error adding journal entry:", error);
       Alert.alert("Error", "Failed to add journal entry. Please try again.", [
@@ -372,7 +380,8 @@ export default function Journal() {
             placeholder="e.g. Watermelon"
           />
         </View>
-        {note.length > 0 &&
+        {account.length > 0 &&
+          note.length > 0 &&
           (account === "Food Expense"
             ? filteredFoodSuggestions.length > 0
             : filteredOtherSuggestions.length > 0) && (
@@ -416,7 +425,7 @@ export default function Journal() {
           ]}
           onPress={handleAddItems}
         >
-          <AntDesign name="pluscircleo" size={40} color="green" />
+          <AntDesign name="pluscircleo" size={40} color={Colors.primary} />
         </Pressable>
 
         {items.length > 0 && (
@@ -424,7 +433,7 @@ export default function Journal() {
         )}
 
         <CustomButton
-          handlePress={handleAdd}
+          handlePress={handleSubmit}
           title="Submit"
           buttonStyle={{ marginTop: 20 }}
         />
@@ -446,7 +455,7 @@ const styles = StyleSheet.create({
   foodItem: {
     flex: 1,
     padding: 5,
-    backgroundColor: "green",
+    backgroundColor: Colors.primary,
     borderRadius: 5,
     alignSelf: "flex-start",
   },

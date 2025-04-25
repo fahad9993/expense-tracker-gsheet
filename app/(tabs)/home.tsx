@@ -6,7 +6,6 @@ import {
   FlatList,
   Pressable,
   Alert,
-  StatusBar,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -111,15 +110,12 @@ export default function Home() {
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
         <View style={styles.headerContainer}>
-          <Text style={styles.heading}>Cash in Hand</Text>
-          <View style={styles.sync}>
-            <Pressable
-              style={({ pressed }) => [{ opacity: pressed ? 0.2 : 1 }]}
-              onPress={handleSync}
-            >
-              <MaterialIcons name="sync" size={24} />
-            </Pressable>
-          </View>
+          <Pressable
+            style={({ pressed }) => [{ opacity: pressed ? 0.2 : 1 }]}
+            onPress={handleSync}
+          >
+            <MaterialIcons name="sync" size={24} />
+          </Pressable>
         </View>
         {loading ? (
           <View style={styles.initialLoader}>
@@ -162,18 +158,16 @@ export default function Home() {
                 buttonStyle={{
                   backgroundColor: "red",
                   flexGrow: 1,
-                  marginTop: 20,
                 }}
               />
               <CustomButton
                 handlePress={handleUpdate}
                 title="Update"
-                buttonStyle={{ flexGrow: 1, marginTop: 20 }}
+                buttonStyle={{ flexGrow: 1 }}
               />
             </View>
           </>
         )}
-        <StatusBar backgroundColor={"green"} barStyle={"light-content"} />
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -183,31 +177,24 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     gap: 5,
+    marginTop: 10,
   },
   container: {
     flex: 1,
     padding: 10,
   },
   headerContainer: {
+    flexDirection: "row",
     alignItems: "center",
-    marginBottom: 30,
-  },
-  heading: {
-    fontSize: 20,
-    alignSelf: "center",
-    fontWeight: "bold",
+    justifyContent: "center",
   },
   initialLoader: {
     justifyContent: "flex-start",
     alignItems: "stretch",
     marginTop: 10,
   },
-  sync: {
-    position: "absolute",
-    right: 20,
-    top: 20,
-  },
   total: {
+    marginTop: 10,
     fontSize: 18,
     fontWeight: "bold",
   },

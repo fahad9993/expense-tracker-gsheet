@@ -75,7 +75,7 @@ export default function PieChartComponent({ pieData }: Props) {
   };
 
   return (
-    <View style={{ flex: 1, marginTop: 20, alignItems: "center" }}>
+    <View style={{ flex: 1, marginVertical: 20, alignItems: "center" }}>
       <CustomButton
         title={showMonthly ? "Show Yearly" : "Show Monthly"}
         handlePress={() => setShowMonthly(!showMonthly)}
@@ -101,6 +101,7 @@ export default function PieChartComponent({ pieData }: Props) {
         </View>
       )}
       <FlatList
+        scrollEnabled={false}
         ref={flatListRef}
         onScrollToIndexFailed={(info) => {
           setTimeout(() => {

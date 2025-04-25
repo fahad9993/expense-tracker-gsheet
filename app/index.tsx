@@ -14,6 +14,7 @@ import { FontAwesome } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 
 import { AuthContext } from "@/context/AuthContext";
+import { Colors } from "@/utils/colors";
 
 const Index = () => {
   const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
@@ -26,6 +27,18 @@ const Index = () => {
   const router = useRouter();
 
   const handleLogin = async () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!username || !password) {
+      Alert.alert("Missing Fields", "Please enter both username and password.");
+      return;
+    }
+
+    if (!emailRegex.test(username)) {
+      Alert.alert("Invalid Email", "Please enter a valid email address.");
+      return;
+    }
+
     if (isLoggingIn) return;
     setIsLoggingIn(true);
     Keyboard.dismiss();
@@ -100,14 +113,14 @@ const Index = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Login Button */}
-      {/* <Button title="Login" onPress={handleLogin} /> */}
       <TouchableOpacity
         style={[styles.button, isLoggingIn && styles.disabledButton]}
         onPress={handleLogin}
         disabled={isLoggingIn}
       >
-        <Text style={styles.buttonText}>
+        <Text
+          style={[styles.buttonText, { color: isLoggingIn ? "black" : "#fff" }]}
+        >
           {isLoggingIn ? "Logging in..." : "Login"}
         </Text>
       </TouchableOpacity>
@@ -119,14 +132,13 @@ const styles = StyleSheet.create({
   button: {
     width: "100%",
     height: 50,
-    backgroundColor: "#1E90FF",
+    backgroundColor: Colors.primary,
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
   },
   buttonText: {
-    color: "#fff",
     fontSize: 18,
   },
   container: {
@@ -134,9 +146,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+    backgroundColor: Colors.login,
   },
   disabledButton: {
-    backgroundColor: "#A9A9A9", // Gray color when disabled
+    backgroundColor: Colors.login,
+    borderWidth: 1,
+    borderColor: "black",
   },
   eyeIcon: {
     position: "absolute",

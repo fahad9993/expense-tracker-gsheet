@@ -1,6 +1,14 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { View, StyleSheet, Modal, Text, TextInput, Alert } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Modal,
+  Text,
+  TextInput,
+  Alert,
+  ScrollView,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -152,8 +160,12 @@ export default function Dashboard() {
   }
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <ScrollView
+        style={{ paddingVertical: 10 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.agentContainer}>
           <AgentAmount
             source={require("../../assets/images/nagad.png")}
@@ -177,67 +189,6 @@ export default function Dashboard() {
           />
         </View>
 
-        <Modal
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(!modalVisible);
-            setNewAmount("");
-          }}
-          transparent={true}
-        >
-          <View style={styles.modalBackground}>
-            <View style={styles.modalView}>
-              <Text
-                style={{
-                  fontSize: 16,
-                  textAlign: "center",
-                  fontWeight: "bold",
-                }}
-              >
-                {curentIndex !== null ? headers[curentIndex] : "Header"}
-              </Text>
-              <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-                New amount:
-              </Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  { borderColor: amountError ? "red" : "gray" },
-                ]}
-                value={newAmount}
-                keyboardType="numeric"
-                onChangeText={(text) => {
-                  setNewAmount(text);
-                  if (amountError && text.trim() !== "") {
-                    setAmountError(false);
-                  }
-                }}
-                placeholder="Enter updated amount.."
-                onFocus={() => {}}
-              />
-              {amountError && (
-                <Text style={{ color: "red", fontSize: 12 }}>
-                  This field cannot be empty.
-                </Text>
-              )}
-              <View style={{ flexDirection: "row", gap: 10 }}>
-                <CustomButton
-                  title="Cancel"
-                  handlePress={() => {
-                    setModalVisible(false);
-                    setNewAmount("");
-                  }}
-                  buttonStyle={{ backgroundColor: "red", flex: 1 }}
-                />
-                <CustomButton
-                  title="Save"
-                  handlePress={handleSave}
-                  buttonStyle={{ flex: 1 }}
-                />
-              </View>
-            </View>
-          </View>
-        </Modal>
         {!!variance && (
           <View style={styles.variance}>
             <Text style={styles.variaceText}>Variance:</Text>
@@ -245,8 +196,69 @@ export default function Dashboard() {
           </View>
         )}
         <PieChart pieData={pieData} />
-      </SafeAreaView>
-    </SafeAreaProvider>
+      </ScrollView>
+      <Modal
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+          setNewAmount("");
+        }}
+        transparent={true}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalView}>
+            <Text
+              style={{
+                fontSize: 16,
+                textAlign: "center",
+                fontWeight: "bold",
+              }}
+            >
+              {curentIndex !== null ? headers[curentIndex] : "Header"}
+            </Text>
+            <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+              New amount:
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                { borderColor: amountError ? "red" : "gray" },
+              ]}
+              value={newAmount}
+              keyboardType="numeric"
+              onChangeText={(text) => {
+                setNewAmount(text);
+                if (amountError && text.trim() !== "") {
+                  setAmountError(false);
+                }
+              }}
+              placeholder="Enter updated amount.."
+              onFocus={() => {}}
+            />
+            {amountError && (
+              <Text style={{ color: "red", fontSize: 12 }}>
+                This field cannot be empty.
+              </Text>
+            )}
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <CustomButton
+                title="Cancel"
+                handlePress={() => {
+                  setModalVisible(false);
+                  setNewAmount("");
+                }}
+                buttonStyle={{ backgroundColor: "red", flex: 1 }}
+              />
+              <CustomButton
+                title="Save"
+                handlePress={handleSave}
+                buttonStyle={{ flex: 1 }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
@@ -259,8 +271,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    margin: 10,
-    padding: 10,
+    paddingHorizontal: 10,
   },
   input: {
     width: "100%",
