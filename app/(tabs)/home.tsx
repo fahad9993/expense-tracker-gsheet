@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     gap: 5,
-    marginTop: 10,
+    marginTop: 20,
   },
   container: {
     flex: 1,

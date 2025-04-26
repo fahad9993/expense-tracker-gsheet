@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -8,7 +8,9 @@ import {
   Alert,
   FlatList,
   TextInput,
+  Keyboard,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 import CustomButton from "@/components/CustomButton";
@@ -16,6 +18,7 @@ import { AuthContext } from "@/context/AuthContext";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import ItemsTable from "@/components/ItemsTable";
 import { Colors } from "@/utils/colors";
+import { useKeyboard } from "@/context/KeyboardContext";
 
 type Item = {
   note: string;
@@ -53,6 +56,25 @@ export default function Journal() {
   const [accountError, setAccountError] = useState(false);
   const lastFetchedRef = useRef<{ account: string; dateText: string } | null>(
     null
+  );
+
+  //Keybord show hide functionality
+  const { setKeyboardVisible } = useKeyboard();
+
+  useFocusEffect(
+    useCallback(() => {
+      const showSub = Keyboard.addListener("keyboardDidShow", () => {
+        setKeyboardVisible(true);
+      });
+      const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+        setKeyboardVisible(false);
+      });
+
+      return () => {
+        showSub.remove();
+        hideSub.remove();
+      };
+    }, [])
   );
 
   useEffect(() => {

@@ -2,12 +2,17 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import TabBarButton from "./TabBarButton";
+import { useKeyboard } from "@/context/KeyboardContext";
 
 const TabBar: React.FC<BottomTabBarProps> = ({
   state,
   descriptors,
   navigation,
 }) => {
+  const { isKeyboardVisible } = useKeyboard();
+
+  if (isKeyboardVisible) return null;
+
   return (
     <View style={styles.container}>
       {state.routes.map((route, index) => {

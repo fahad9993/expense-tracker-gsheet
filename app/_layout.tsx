@@ -8,6 +8,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import AuthContextProvider, { AuthContext } from "@/context/AuthContext";
 import { isTokenExpired, refreshAccessToken } from "@/utils/auth";
 import { Colors } from "@/utils/colors";
+import { KeyboardProvider } from "@/context/KeyboardContext";
 
 function Layout() {
   const authCtx = useContext(AuthContext);
@@ -64,7 +65,9 @@ function Layout() {
 export default function RootLayout() {
   return (
     <AuthContextProvider>
-      <Layout />
+      <KeyboardProvider>
+        <Layout />
+      </KeyboardProvider>
     </AuthContextProvider>
   );
 }
