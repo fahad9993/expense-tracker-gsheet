@@ -10,6 +10,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
+import Toast from "react-native-toast-message";
 
 import AgentAmount from "@/components/AgentAmount";
 import CustomButton from "@/components/CustomButton";
@@ -29,6 +30,7 @@ export default function Dashboard() {
   const [variance, setVariance] = useState(0);
   const authCtx = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const headers = ["Nagad", "bKash", "Rocket", "Cash"];
   const router = useRouter();
@@ -83,7 +85,7 @@ export default function Dashboard() {
     setModalVisible(true);
   };
 
-  const handleSave = async () => {
+  const handleUpdate = async () => {
     const updatedAmounts = [...amounts];
     const trimmed = newAmount.trim();
 
@@ -100,14 +102,17 @@ export default function Dashboard() {
     }
 
     if (arraysAreEqual(lastSavedAmount.current, updatedAmounts)) {
-      Alert.alert("Warning!", "You cannot save values equal previous amount.", [
-        { text: "Ok" },
-      ]);
+      Toast.show({
+        type: "info",
+        text1: "Warning!",
+        text2: "You cannot save values equal previous amount.",
+      });
       return;
     }
 
     setAmounts(updatedAmounts);
     setAmountError(false);
+    setIsUpdating(true);
 
     try {
       const response = await authCtx.authFetch(
@@ -121,23 +126,20 @@ export default function Dashboard() {
         }
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        console.error("Server error:", data?.message || "Unknown error");
-        Alert.alert("Error", data?.message || "Failed to update");
-        return;
+      if (response.ok) {
+        Toast.show({
+          type: "success",
+          text1: "Success",
+          text2: "Agent amount updated successfully.",
+        });
       }
-
-      Alert.alert("Success!", "Agent amount updated successfully.", [
-        { text: "Ok" },
-      ]);
 
       lastSavedAmount.current = updatedAmounts;
     } catch (error) {
       console.error("Error updating amounts: ", error);
       Alert.alert("Error", "Something went wrong while updating.");
     } finally {
+      setIsUpdating(false);
       setModalVisible(false);
       setCurrentIndex(null);
       setNewAmount("");
@@ -244,9 +246,10 @@ export default function Dashboard() {
                 buttonStyle={{ backgroundColor: "red", flex: 1 }}
               />
               <CustomButton
-                title="Save"
-                handlePress={handleSave}
+                title="Update"
+                handlePress={handleUpdate}
                 buttonStyle={{ flex: 1 }}
+                loading={isUpdating}
               />
             </View>
           </View>

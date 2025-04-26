@@ -2,6 +2,7 @@ import { StatusBar } from "react-native";
 import { useContext, useEffect } from "react";
 import { Stack } from "expo-router/stack";
 import { useRouter } from "expo-router";
+import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import LoadingScreen from "@/components/LoadingScreen";
@@ -9,6 +10,7 @@ import AuthContextProvider, { AuthContext } from "@/context/AuthContext";
 import { isTokenExpired, refreshAccessToken } from "@/utils/auth";
 import { Colors } from "@/utils/colors";
 import { KeyboardProvider } from "@/context/KeyboardContext";
+import toastConfig from "@/utils/toastConfig";
 
 function Layout() {
   const authCtx = useContext(AuthContext);
@@ -57,6 +59,7 @@ function Layout() {
     <>
       <StatusBar backgroundColor={Colors.login} barStyle={"dark-content"} />
       <Stack screenOptions={{ headerShown: false }} />
+      <Toast config={toastConfig} />
     </>
   );
 }

@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import Toast from "react-native-toast-message";
 
 import CustomButton from "@/components/CustomButton";
 import { AuthContext } from "@/context/AuthContext";
@@ -54,6 +55,7 @@ export default function Journal() {
     string[]
   >([]);
   const [accountError, setAccountError] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const lastFetchedRef = useRef<{ account: string; dateText: string } | null>(
     null
   );
@@ -240,14 +242,22 @@ export default function Journal() {
         setFilteredFoodSuggestions([]);
         setFilteredOtherSuggestions([]);
       } else {
-        Alert.alert("Duplicate!", "This item already exists.");
+        Toast.show({
+          type: "info",
+          text1: "Duplicate!",
+          text2: "This item already exists.",
+        });
         setNote("");
         setAmount("");
         setFilteredFoodSuggestions([]);
         setFilteredOtherSuggestions([]);
       }
     } else {
-      Alert.alert("Warning!", "Check your inputs!");
+      Toast.show({
+        type: "info",
+        text1: "Warning!",
+        text2: "Check your inputs.",
+      });
     }
   };
 
@@ -265,7 +275,7 @@ export default function Journal() {
     const combinedAmounts =
       (items.length > 1 ? "=" : "") +
       items.map((item) => item.amount).join("+");
-
+    setIsUpdating(true);
     try {
       const response = await authCtx.authFetch(
         `${apiEndpoint}/appendJournalEntry`,
@@ -284,9 +294,11 @@ export default function Journal() {
       );
 
       if (response.ok) {
-        Alert.alert("Success!", "Journal entry added successfully.", [
-          { text: "Ok" },
-        ]);
+        Toast.show({
+          type: "success",
+          text1: "Success",
+          text2: "Journal entry added successfully.",
+        });
         setItems([]);
       } else {
         Alert.alert("Error!", "Failed to add data.");
@@ -297,6 +309,7 @@ export default function Journal() {
         { text: "OK" },
       ]);
     } finally {
+      setIsUpdating(false);
       const today = new Date();
       setDate(today);
       setDateText(formatDate(today));
@@ -456,6 +469,7 @@ export default function Journal() {
         handlePress={handleSubmit}
         title="Submit"
         buttonStyle={{ marginTop: 20 }}
+        loading={isUpdating}
       />
     </View>
   );

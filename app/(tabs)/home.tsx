@@ -8,6 +8,7 @@ import {
   ScrollView,
   RefreshControl,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 import BankNoteCard from "@/components/BankNoteCard";
@@ -22,6 +23,7 @@ export default function Home() {
   const [bankNotes, setBankNotes] = useState<number[]>([]);
   const [quantities, setQuantities] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const lastSavedQuantities = useRef(quantities);
 
@@ -75,27 +77,44 @@ export default function Home() {
 
   const handleUpdate = async () => {
     if (arraysAreEqual(lastSavedQuantities.current, quantities)) {
-      Alert.alert("Warning!", "Quantities not changed.");
+      Toast.show({
+        type: "info",
+        text1: "Warning!",
+        text2: "Quantities not changed.",
+      });
       return;
     }
+    setIsUpdating(true);
     try {
-      await authCtx.authFetch(`${apiEndpoint}/updateQuantities`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ quantities }),
-      });
+      const response = await authCtx.authFetch(
+        `${apiEndpoint}/updateQuantities`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ quantities }),
+        }
+      );
 
-      Alert.alert("Success!", "Quantities updated successfully.", [
-        { text: "Ok" },
-      ]);
+      const message = await response.text();
+
+      if (response.ok) {
+        Toast.show({
+          type: "success",
+          text1: "Success",
+          text2: message,
+        });
+      }
     } catch (error) {
       console.error("Error updating quantities:", error);
-      Alert.alert("Error", "Failed to update quantities. Please try again.", [
-        { text: "OK" },
-      ]);
+      Toast.show({
+        type: "error",
+        text1: "Error!",
+        text2: "Failed to update quantities. Please try again.",
+      });
     } finally {
+      setIsUpdating(false);
       lastSavedQuantities.current = [...quantities];
     }
   };
@@ -149,13 +168,14 @@ export default function Home() {
               title="Reset all"
               buttonStyle={{
                 backgroundColor: "red",
-                flexGrow: 1,
+                flex: 1,
               }}
             />
             <CustomButton
               handlePress={handleUpdate}
               title="Update"
-              buttonStyle={{ flexGrow: 1 }}
+              buttonStyle={{ flex: 1 }}
+              loading={isUpdating}
             />
           </View>
         </>
