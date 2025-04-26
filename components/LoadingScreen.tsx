@@ -1,5 +1,14 @@
 import { useEffect, useRef } from "react";
-import { View, Text, StyleSheet, Animated, Easing } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Animated,
+  Easing,
+  StatusBar,
+} from "react-native";
+
+import { Colors } from "@/utils/colors";
 
 export default function LoadingScreen() {
   const spinAnim = useRef(new Animated.Value(0)).current;
@@ -47,6 +56,7 @@ export default function LoadingScreen() {
         ]}
       />
       <Text style={styles.text}>Checking tokens...</Text>
+      <StatusBar backgroundColor={Colors.login} barStyle={"dark-content"} />
     </View>
   );
 }
@@ -56,7 +66,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f9f9f9",
+    backgroundColor: Colors.login,
   },
   image: {
     width: 100,

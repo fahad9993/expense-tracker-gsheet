@@ -1,12 +1,15 @@
+import { StatusBar } from "react-native";
 import { Tabs, usePathname } from "expo-router";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+
 import TabBar from "@/components/TabBar";
 import Header from "@/components/Header";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "react-native";
 import { Colors } from "@/utils/colors";
+import toastConfig from "@/utils/toastConfig";
 
 const tabs: {
   name: string;
@@ -42,25 +45,28 @@ export default function TabLayout() {
   const headerTitle = currentTab ? currentTab.title : "App Title"; // Fallback if no match
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={{ flex: 1 }}>
-        <Header title={headerTitle} />
-        <Tabs
-          tabBar={(props) => <TabBar {...props} />}
-          screenOptions={{ headerShown: false }}
-        >
-          {tabs.map(({ name, title, icon }) => (
-            <Tabs.Screen
-              key={name}
-              name={name}
-              options={{
-                title,
-                tabBarIcon: ({ color, size }) => icon(color, size),
-              }}
-            />
-          ))}
-        </Tabs>
-      </SafeAreaView>
-      <StatusBar backgroundColor={Colors.primary} barStyle={"light-content"} />
+      <>
+        <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
+        <SafeAreaView style={{ flex: 1 }} edges={["left", "right", "bottom"]}>
+          <Header title={headerTitle} />
+          <Tabs
+            tabBar={(props) => <TabBar {...props} />}
+            screenOptions={{ headerShown: false }}
+          >
+            {tabs.map(({ name, title, icon }) => (
+              <Tabs.Screen
+                key={name}
+                name={name}
+                options={{
+                  title,
+                  tabBarIcon: ({ color, size }) => icon(color, size),
+                }}
+              />
+            ))}
+          </Tabs>
+        </SafeAreaView>
+        <Toast config={toastConfig} />
+      </>
     </SafeAreaProvider>
   );
 }

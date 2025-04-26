@@ -31,36 +31,49 @@ export default function Home() {
 
   // Function to fetch the data from the server
   const fetchData = async () => {
-    // setLoading(true);
-    try {
-      const response = await authCtx.authFetch(
-        `${apiEndpoint}/fetchQuantities`
-      );
+    const response = await authCtx.authFetch(`${apiEndpoint}/fetchQuantities`);
 
-      const { bankNotes: fetchedBankNotes, quantities: fetchedQuantities } =
-        await response.json();
+    const { bankNotes: fetchedBankNotes, quantities: fetchedQuantities } =
+      await response.json();
 
-      setBankNotes(fetchedBankNotes || []);
-      setQuantities(
-        fetchedQuantities && fetchedQuantities.length
-          ? fetchedQuantities
-          : fetchedBankNotes.map(() => 0)
-      );
-    } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to fetch data.");
-      if (error.message?.includes("Session expired")) {
-        authCtx.logout();
-      }
-    } finally {
-      setLoading(false);
-    }
+    const safeBankNotes = fetchedBankNotes ?? [];
+    const safeQuantities =
+      fetchedQuantities && fetchedQuantities.length
+        ? fetchedQuantities
+        : fetchedBankNotes.map(() => 0);
+    return { safeBankNotes, safeQuantities };
   };
 
-  const { refreshing, onRefresh } = useRefresh(fetchData);
+  const refreshData = async () => {
+    const { safeBankNotes, safeQuantities } = await fetchData();
+    setBankNotes(safeBankNotes);
+    setQuantities(safeQuantities);
+    lastSavedQuantities.current = safeQuantities;
+  };
+
+  const { refreshing, onRefresh } = useRefresh(refreshData);
 
   // Fetch data from the backend server on mount
   useEffect(() => {
-    fetchData();
+    const load = async () => {
+      setLoading(true);
+      try {
+        const { safeBankNotes, safeQuantities } = await fetchData();
+
+        setBankNotes(safeBankNotes);
+        setQuantities(safeQuantities);
+        lastSavedQuantities.current = safeQuantities;
+      } catch (error: any) {
+        Alert.alert("Error", error.message || "Failed to fetch data.");
+        if (error.message?.includes("Session expired")) {
+          authCtx.logout();
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
   }, []);
 
   const handleResetAll = () => {
@@ -75,6 +88,27 @@ export default function Home() {
     });
   };
 
+  const updateQuantities = async (newQuantities: number[]) => {
+    const response = await authCtx.authFetch(
+      `${apiEndpoint}/updateQuantities`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ quantities: newQuantities }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      throw new Error(errorMessage || "Failed to update quantities.");
+    }
+
+    const successMessage = await response.text();
+    return successMessage;
+  };
+
   const handleUpdate = async () => {
     if (arraysAreEqual(lastSavedQuantities.current, quantities)) {
       Toast.show({
@@ -86,36 +120,24 @@ export default function Home() {
     }
     setIsUpdating(true);
     try {
-      const response = await authCtx.authFetch(
-        `${apiEndpoint}/updateQuantities`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ quantities }),
-        }
-      );
+      const message = await updateQuantities(quantities);
 
-      const message = await response.text();
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: message,
+      });
 
-      if (response.ok) {
-        Toast.show({
-          type: "success",
-          text1: "Success",
-          text2: message,
-        });
-      }
-    } catch (error) {
+      lastSavedQuantities.current = [...quantities]; // only update if server success
+    } catch (error: any) {
       console.error("Error updating quantities:", error);
       Toast.show({
         type: "error",
         text1: "Error!",
-        text2: "Failed to update quantities. Please try again.",
+        text2: error.message || "Failed to update quantities.",
       });
     } finally {
       setIsUpdating(false);
-      lastSavedQuantities.current = [...quantities];
     }
   };
 

@@ -126,11 +126,13 @@ export default function Dashboard() {
         }
       );
 
+      const message = await response.text();
+
       if (response.ok) {
         Toast.show({
           type: "success",
           text1: "Success",
-          text2: "Agent amount updated successfully.",
+          text2: message,
         });
       }
 

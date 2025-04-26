@@ -271,6 +271,21 @@ export default function Journal() {
       return;
     }
 
+    if (!note || !amount) {
+      const missingFields = [!note && "Note", !amount && "Amount"]
+        .filter(Boolean)
+        .join(" and ");
+
+      Toast.show({
+        type: "info",
+        text1: "Warning!",
+        text2: `${missingFields} field${
+          missingFields.includes("and") ? "s" : ""
+        } cannot be empty.`,
+      });
+      return;
+    }
+
     const combinedNotes = items.map((item) => item.note).join(", ");
     const combinedAmounts =
       (items.length > 1 ? "=" : "") +
