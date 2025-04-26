@@ -20,6 +20,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import ItemsTable from "@/components/ItemsTable";
 import { Colors } from "@/utils/colors";
 import { useKeyboard } from "@/context/KeyboardContext";
+import { BASE_URL } from "@/api/apiConfig";
 
 type Item = {
   note: string;
@@ -31,7 +32,7 @@ export default function Journal() {
     return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
   };
 
-  const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
+  const apiEndpoint = `${BASE_URL}/journal`;
   const authCtx = useContext(AuthContext);
   const [isAccountClicked, setIsAccountClicked] = useState(false);
 
@@ -100,7 +101,7 @@ export default function Journal() {
   const fetchExistingEntry = async () => {
     try {
       const response = await authCtx.authFetch(
-        `${apiEndpoint}/getJournalEntry?date=${encodeURIComponent(
+        `${apiEndpoint}/fetch?date=${encodeURIComponent(
           dateText
         )}&account=${encodeURIComponent(account)}`
       );
@@ -292,21 +293,18 @@ export default function Journal() {
       items.map((item) => item.amount).join("+");
     setIsUpdating(true);
     try {
-      const response = await authCtx.authFetch(
-        `${apiEndpoint}/appendJournalEntry`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            date: dateText,
-            account: account,
-            amount: items.length !== 0 ? combinedAmounts.trim() : amount.trim(),
-            note: items.length !== 0 ? combinedNotes.trim() : note.trim(),
-          }),
-        }
-      );
+      const response = await authCtx.authFetch(`${apiEndpoint}/append`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          date: dateText,
+          account: account,
+          amount: items.length !== 0 ? combinedAmounts.trim() : amount.trim(),
+          note: items.length !== 0 ? combinedNotes.trim() : note.trim(),
+        }),
+      });
 
       if (response.ok) {
         Toast.show({

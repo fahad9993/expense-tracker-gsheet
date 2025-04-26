@@ -17,9 +17,10 @@ import { AuthContext } from "@/context/AuthContext";
 import BankNoteSkeleton from "@/components/LoadingSkeleton/BankNoteSkeleton";
 import { arraysAreEqual } from "@/utils/functions";
 import { useRefresh } from "@/hooks/useRefresh";
+import { BASE_URL } from "@/api/apiConfig";
 
 export default function Home() {
-  const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
+  const apiEndpoint = `${BASE_URL}/home`;
   const [bankNotes, setBankNotes] = useState<number[]>([]);
   const [quantities, setQuantities] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +32,7 @@ export default function Home() {
 
   // Function to fetch the data from the server
   const fetchData = async () => {
-    const response = await authCtx.authFetch(`${apiEndpoint}/fetchQuantities`);
+    const response = await authCtx.authFetch(`${apiEndpoint}/fetch`);
 
     const { bankNotes: fetchedBankNotes, quantities: fetchedQuantities } =
       await response.json();
@@ -89,16 +90,13 @@ export default function Home() {
   };
 
   const updateQuantities = async (newQuantities: number[]) => {
-    const response = await authCtx.authFetch(
-      `${apiEndpoint}/updateQuantities`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ quantities: newQuantities }),
-      }
-    );
+    const response = await authCtx.authFetch(`${apiEndpoint}/update`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ quantities: newQuantities }),
+    });
 
     if (!response.ok) {
       const errorMessage = await response.text();

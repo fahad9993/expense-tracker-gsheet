@@ -19,9 +19,10 @@ import { AuthContext } from "@/context/AuthContext";
 import DashboardSkeleton from "@/components/LoadingSkeleton/DashboardSkeleton";
 import { arraysAreEqual } from "@/utils/functions";
 import { useRefresh } from "@/hooks/useRefresh";
+import { BASE_URL } from "@/api/apiConfig";
 
 export default function Dashboard() {
-  const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
+  const apiEndpoint = `${BASE_URL}/dashboard`;
   const [amounts, setAmounts] = useState<number[]>([0, 0, 0, 0]);
   const [modalVisible, setModalVisible] = useState(false);
   const [curentIndex, setCurrentIndex] = useState<number | null>(null);
@@ -45,9 +46,7 @@ export default function Dashboard() {
 
   const fetchData = useCallback(async () => {
     try {
-      const response = await authCtx.authFetch(
-        `${apiEndpoint}/getDashboardInfo`
-      );
+      const response = await authCtx.authFetch(`${apiEndpoint}/fetch`);
       if (response.ok) {
         const data = await response.json();
         const sanitizedAmounts = data.amounts.map((amount: number) =>
@@ -115,16 +114,13 @@ export default function Dashboard() {
     setIsUpdating(true);
 
     try {
-      const response = await authCtx.authFetch(
-        `${apiEndpoint}/updateDashboardInfo`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ amounts: updatedAmounts }),
-        }
-      );
+      const response = await authCtx.authFetch(`${apiEndpoint}/update`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amounts: updatedAmounts }),
+      });
 
       const message = await response.text();
 

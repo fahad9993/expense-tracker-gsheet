@@ -1,4 +1,5 @@
 import { jwtDecode } from "jwt-decode";
+import { BASE_URL } from "@/api/apiConfig";
 
 /** Checks if a JWT token is expired */
 export function isTokenExpired(token: string): boolean {
@@ -15,14 +16,11 @@ export async function refreshAccessToken(
   refreshToken: string
 ): Promise<string | null> {
   try {
-    const response = await fetch(
-      "https://expense-tracker-gsheet.onrender.com/refreshToken",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken }),
-      }
-    );
+    const response = await fetch(`${BASE_URL}/auth/refreshToken`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
+    });
 
     if (!response.ok) throw new Error("Refresh failed");
 
