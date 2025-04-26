@@ -9,7 +9,6 @@ import {
   FlatList,
   TextInput,
 } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 import CustomButton from "@/components/CustomButton";
@@ -291,154 +290,152 @@ export default function Journal() {
   };
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.container}>
-        <View>
-          <Text style={styles.label}>Date</Text>
+    <View style={styles.container}>
+      <View>
+        <Text style={styles.label}>Date</Text>
 
-          {showPicker && (
-            <DateTimePicker
-              mode="date"
-              display="spinner"
-              value={date}
-              onChange={onChange}
-            />
-          )}
-
-          <Pressable onPress={toggleDatePicker}>
-            <TextInput
-              style={styles.input}
-              value={dateText}
-              onChangeText={setDateText}
-              placeholder="e.g. M/D/YYYY"
-              editable={false}
-            />
-          </Pressable>
-        </View>
-
-        <View>
-          <Text style={styles.label}>Account</Text>
-          {accountError && (
-            <Text style={{ color: "red", marginBottom: 4 }}>
-              Please select a valid account from the suggestions.
-            </Text>
-          )}
-          <TextInput
-            style={[
-              styles.input,
-              accountError && { borderColor: "red", borderWidth: 2 },
-            ]}
-            value={account}
-            onChangeText={onChangeText}
-            placeholder="e.g. Food Expense"
-            onFocus={() => {
-              setIsAccountClicked(true);
-              setFilteredSuggestions(accountSuggestions);
-            }}
-            onBlur={() => {
-              setIsAccountClicked(false);
-              setAccountError(false);
-            }}
+        {showPicker && (
+          <DateTimePicker
+            mode="date"
+            display="spinner"
+            value={date}
+            onChange={onChange}
           />
-          {isAccountClicked && (
-            <View style={styles.suggestionList}>
-              {filteredSuggestions.length > 0 ? (
-                <FlatList
-                  keyboardShouldPersistTaps="always"
-                  data={filteredSuggestions}
-                  keyExtractor={(item) => item}
-                  renderItem={({ item }) => (
-                    <Pressable
-                      style={styles.suggestionItem}
-                      onPress={() => {
-                        setAccount(item);
-                        setFilteredSuggestions([]);
-                        setIsAccountClicked(false);
-                        setAccountError(false);
-                      }}
-                    >
-                      <Text>{item}</Text>
-                    </Pressable>
-                  )}
-                />
-              ) : (
-                <View style={styles.suggestionItem}>
-                  <Text style={{ color: "gray", fontStyle: "italic" }}>
-                    No match found
-                  </Text>
-                </View>
-              )}
-            </View>
-          )}
-        </View>
-        <View>
-          <Text style={styles.label}>Note</Text>
-          <TextInput
-            style={styles.input}
-            value={note}
-            onChangeText={onChangeTextNote}
-            placeholder="e.g. Watermelon"
-          />
-        </View>
-        {account.length > 0 &&
-          note.length > 0 &&
-          (account === "Food Expense"
-            ? filteredFoodSuggestions.length > 0
-            : filteredOtherSuggestions.length > 0) && (
-            <View style={{ marginBottom: 15 }}>
-              <FlatList
-                horizontal
-                keyboardShouldPersistTaps="always"
-                data={
-                  account === "Food Expense"
-                    ? filteredFoodSuggestions
-                    : filteredOtherSuggestions
-                }
-                keyExtractor={(_, index) => index.toString()}
-                renderItem={({ item }) => (
-                  <Pressable
-                    onPress={() => setNote(item)}
-                    style={styles.foodItem}
-                  >
-                    <Text style={{ color: "white" }}>{item}</Text>
-                  </Pressable>
-                )}
-                ItemSeparatorComponent={() => <View style={{ width: 5 }} />}
-                showsHorizontalScrollIndicator={false}
-              />
-            </View>
-          )}
-        <View>
-          <Text style={styles.label}>Amount</Text>
-          <TextInput
-            style={styles.input}
-            value={amount}
-            onChangeText={setAmount}
-            placeholder="e.g. 100"
-            keyboardType="numeric"
-          />
-        </View>
-        <Pressable
-          style={({ pressed }) => [
-            styles.addItemButton,
-            { opacity: pressed ? 0.7 : 1 },
-          ]}
-          onPress={handleAddItems}
-        >
-          <AntDesign name="pluscircleo" size={40} color={Colors.primary} />
-        </Pressable>
-
-        {items.length > 0 && (
-          <ItemsTable items={items} onRemoveItem={handleRemoveItem} />
         )}
 
-        <CustomButton
-          handlePress={handleSubmit}
-          title="Submit"
-          buttonStyle={{ marginTop: 20 }}
+        <Pressable onPress={toggleDatePicker}>
+          <TextInput
+            style={styles.input}
+            value={dateText}
+            onChangeText={setDateText}
+            placeholder="e.g. M/D/YYYY"
+            editable={false}
+          />
+        </Pressable>
+      </View>
+
+      <View>
+        <Text style={styles.label}>Account</Text>
+        {accountError && (
+          <Text style={{ color: "red", marginBottom: 4 }}>
+            Please select a valid account from the suggestions.
+          </Text>
+        )}
+        <TextInput
+          style={[
+            styles.input,
+            accountError && { borderColor: "red", borderWidth: 2 },
+          ]}
+          value={account}
+          onChangeText={onChangeText}
+          placeholder="e.g. Food Expense"
+          onFocus={() => {
+            setIsAccountClicked(true);
+            setFilteredSuggestions(accountSuggestions);
+          }}
+          onBlur={() => {
+            setIsAccountClicked(false);
+            setAccountError(false);
+          }}
         />
-      </SafeAreaView>
-    </SafeAreaProvider>
+        {isAccountClicked && (
+          <View style={styles.suggestionList}>
+            {filteredSuggestions.length > 0 ? (
+              <FlatList
+                keyboardShouldPersistTaps="always"
+                data={filteredSuggestions}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <Pressable
+                    style={styles.suggestionItem}
+                    onPress={() => {
+                      setAccount(item);
+                      setFilteredSuggestions([]);
+                      setIsAccountClicked(false);
+                      setAccountError(false);
+                    }}
+                  >
+                    <Text>{item}</Text>
+                  </Pressable>
+                )}
+              />
+            ) : (
+              <View style={styles.suggestionItem}>
+                <Text style={{ color: "gray", fontStyle: "italic" }}>
+                  No match found
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+      </View>
+      <View>
+        <Text style={styles.label}>Note</Text>
+        <TextInput
+          style={styles.input}
+          value={note}
+          onChangeText={onChangeTextNote}
+          placeholder="e.g. Watermelon"
+        />
+      </View>
+      {account.length > 0 &&
+        note.length > 0 &&
+        (account === "Food Expense"
+          ? filteredFoodSuggestions.length > 0
+          : filteredOtherSuggestions.length > 0) && (
+          <View style={{ marginBottom: 15 }}>
+            <FlatList
+              horizontal
+              keyboardShouldPersistTaps="always"
+              data={
+                account === "Food Expense"
+                  ? filteredFoodSuggestions
+                  : filteredOtherSuggestions
+              }
+              keyExtractor={(_, index) => index.toString()}
+              renderItem={({ item }) => (
+                <Pressable
+                  onPress={() => setNote(item)}
+                  style={styles.foodItem}
+                >
+                  <Text style={{ color: "white" }}>{item}</Text>
+                </Pressable>
+              )}
+              ItemSeparatorComponent={() => <View style={{ width: 5 }} />}
+              showsHorizontalScrollIndicator={false}
+            />
+          </View>
+        )}
+      <View>
+        <Text style={styles.label}>Amount</Text>
+        <TextInput
+          style={styles.input}
+          value={amount}
+          onChangeText={setAmount}
+          placeholder="e.g. 100"
+          keyboardType="numeric"
+        />
+      </View>
+      <Pressable
+        style={({ pressed }) => [
+          styles.addItemButton,
+          { opacity: pressed ? 0.7 : 1 },
+        ]}
+        onPress={handleAddItems}
+      >
+        <AntDesign name="pluscircleo" size={40} color={Colors.primary} />
+      </Pressable>
+
+      {items.length > 0 && (
+        <ItemsTable items={items} onRemoveItem={handleRemoveItem} />
+      )}
+
+      <CustomButton
+        handlePress={handleSubmit}
+        title="Submit"
+        buttonStyle={{ marginTop: 20 }}
+      />
+    </View>
   );
 }
 

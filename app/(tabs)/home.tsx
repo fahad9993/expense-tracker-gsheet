@@ -4,11 +4,10 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  Pressable,
   Alert,
+  ScrollView,
+  RefreshControl,
 } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { MaterialIcons } from "@expo/vector-icons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 import BankNoteCard from "@/components/BankNoteCard";
@@ -16,7 +15,7 @@ import CustomButton from "@/components/CustomButton";
 import { AuthContext } from "@/context/AuthContext";
 import BankNoteSkeleton from "@/components/LoadingSkeleton/BankNoteSkeleton";
 import { arraysAreEqual } from "@/utils/functions";
-import { useRefetch } from "@/context/RefetchContext";
+import { useRefresh } from "@/hooks/useRefresh";
 
 export default function Home() {
   const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
@@ -27,7 +26,6 @@ export default function Home() {
   const lastSavedQuantities = useRef(quantities);
 
   const authCtx = useContext(AuthContext);
-  const { setNeedsRefetch } = useRefetch();
 
   // Function to fetch the data from the server
   const fetchData = async () => {
@@ -56,15 +54,12 @@ export default function Home() {
     }
   };
 
+  const { refreshing, onRefresh } = useRefresh(fetchData);
+
   // Fetch data from the backend server on mount
   useEffect(() => {
     fetchData();
   }, []);
-
-  // Sync button handler to manually trigger data fetch
-  const handleSync = () => {
-    fetchData();
-  };
 
   const handleResetAll = () => {
     setQuantities(bankNotes.map(() => 0));
@@ -102,74 +97,70 @@ export default function Home() {
       ]);
     } finally {
       lastSavedQuantities.current = [...quantities];
-      setNeedsRefetch(true);
     }
   };
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.container}>
-        <View style={styles.headerContainer}>
-          <Pressable
-            style={({ pressed }) => [{ opacity: pressed ? 0.2 : 1 }]}
-            onPress={handleSync}
-          >
-            <MaterialIcons name="sync" size={24} />
-          </Pressable>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      {loading ? (
+        <View style={styles.initialLoader}>
+          {/* Show skeleton loader when data is loading */}
+          <BankNoteSkeleton />
         </View>
-        {loading ? (
-          <View style={styles.initialLoader}>
-            {/* Show skeleton loader when data is loading */}
-            <BankNoteSkeleton />
-          </View>
-        ) : (
-          <>
-            <FlatList
-              data={bankNotes}
-              keyExtractor={(item) => item.toString()}
-              renderItem={({ item, index }) => (
-                <BankNoteCard
-                  note={item}
-                  quantity={quantities[index]}
-                  onUpdateQuantity={(newQuantity) =>
-                    handleUpdateQuantity(index, newQuantity)
-                  }
-                />
-              )}
+      ) : (
+        <>
+          <FlatList
+            data={bankNotes}
+            keyboardShouldPersistTaps="handled"
+            scrollEnabled={false}
+            keyExtractor={(item) => item.toString()}
+            renderItem={({ item, index }) => (
+              <BankNoteCard
+                note={item}
+                quantity={quantities[index]}
+                onUpdateQuantity={(newQuantity) =>
+                  handleUpdateQuantity(index, newQuantity)
+                }
+              />
+            )}
+          />
+          <Text style={styles.total}>
+            Total amount:{" "}
+            <FontAwesome6
+              name="bangladeshi-taka-sign"
+              size={styles.total.fontSize}
+              color="black"
+            />{" "}
+            {bankNotes
+              .reduce(
+                (sum, note, index) => (sum += note * quantities[index]),
+                0
+              )
+              .toLocaleString()}
+          </Text>
+          <View style={styles.buttonContainer}>
+            <CustomButton
+              handlePress={handleResetAll}
+              title="Reset all"
+              buttonStyle={{
+                backgroundColor: "red",
+                flexGrow: 1,
+              }}
             />
-            <Text style={styles.total}>
-              Total amount:{" "}
-              <FontAwesome6
-                name="bangladeshi-taka-sign"
-                size={styles.total.fontSize}
-                color="black"
-              />{" "}
-              {bankNotes
-                .reduce(
-                  (sum, note, index) => (sum += note * quantities[index]),
-                  0
-                )
-                .toLocaleString()}
-            </Text>
-            <View style={styles.buttonContainer}>
-              <CustomButton
-                handlePress={handleResetAll}
-                title="Reset all"
-                buttonStyle={{
-                  backgroundColor: "red",
-                  flexGrow: 1,
-                }}
-              />
-              <CustomButton
-                handlePress={handleUpdate}
-                title="Update"
-                buttonStyle={{ flexGrow: 1 }}
-              />
-            </View>
-          </>
-        )}
-      </SafeAreaView>
-    </SafeAreaProvider>
+            <CustomButton
+              handlePress={handleUpdate}
+              title="Update"
+              buttonStyle={{ flexGrow: 1 }}
+            />
+          </View>
+        </>
+      )}
+    </ScrollView>
   );
 }
 

@@ -1,5 +1,4 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
   StyleSheet,
@@ -8,9 +7,9 @@ import {
   TextInput,
   Alert,
   ScrollView,
+  RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useFocusEffect } from "@react-navigation/native";
 
 import AgentAmount from "@/components/AgentAmount";
 import CustomButton from "@/components/CustomButton";
@@ -18,7 +17,7 @@ import PieChart from "@/components/PieChart";
 import { AuthContext } from "@/context/AuthContext";
 import DashboardSkeleton from "@/components/LoadingSkeleton/DashboardSkeleton";
 import { arraysAreEqual } from "@/utils/functions";
-import { useRefetch } from "@/context/RefetchContext";
+import { useRefresh } from "@/hooks/useRefresh";
 
 export default function Dashboard() {
   const apiEndpoint = "https://expense-tracker-gsheet.onrender.com";
@@ -30,8 +29,6 @@ export default function Dashboard() {
   const [variance, setVariance] = useState(0);
   const authCtx = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(true);
-
-  const { needsRefetch, setNeedsRefetch } = useRefetch();
 
   const headers = ["Nagad", "bKash", "Rocket", "Cash"];
   const router = useRouter();
@@ -75,19 +72,11 @@ export default function Dashboard() {
     }
   }, [authCtx]);
 
+  const { refreshing, onRefresh } = useRefresh(fetchData);
+
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (needsRefetch) {
-        setIsLoading(true);
-        fetchData();
-        setNeedsRefetch(false);
-      }
-    }, [needsRefetch, fetchData])
-  );
 
   const handlePress = (index: number) => {
     setCurrentIndex(index);
@@ -165,6 +154,9 @@ export default function Dashboard() {
         style={{ paddingVertical: 10 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         <View style={styles.agentContainer}>
           <AgentAmount
@@ -202,6 +194,7 @@ export default function Dashboard() {
         onRequestClose={() => {
           setModalVisible(!modalVisible);
           setNewAmount("");
+          setAmountError(false);
         }}
         transparent={true}
       >
@@ -246,6 +239,7 @@ export default function Dashboard() {
                 handlePress={() => {
                   setModalVisible(false);
                   setNewAmount("");
+                  setAmountError(false);
                 }}
                 buttonStyle={{ backgroundColor: "red", flex: 1 }}
               />
