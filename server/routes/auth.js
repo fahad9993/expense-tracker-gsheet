@@ -5,7 +5,7 @@ const router = express.Router();
 const validUsername = process.env.VALID_USERNAME;
 const validPassword = process.env.VALID_PASSWORD;
 
-router.post("/login", express.json(), (req, res) => {
+router.post("/login", (req, res) => {
   const { username, password } = req.body;
 
   if (username === validUsername && password === validPassword) {
@@ -23,22 +23,22 @@ router.post("/login", express.json(), (req, res) => {
       }
     );
 
-    return res.json({ token, refreshToken }); // Send both tokens
+    return res.status(200).json({ token, refreshToken });
   } else {
-    return res.status(401).send("Invalid credentials");
+    return res.status(401).json({ error: "Invalid credentials" });
   }
 });
 
-router.post("/refreshToken", express.json(), (req, res) => {
+router.post("/refreshToken", (req, res) => {
   const { refreshToken } = req.body;
 
   if (!refreshToken) {
-    return res.status(401).send("No refresh token provided.");
+    return res.status(401).json({ error: "No refresh token provided." });
   }
 
   // Verify refresh token
   jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY, (err, user) => {
-    if (err) return res.status(403).send("Invalid refresh token");
+    if (err) return res.status(403).json({ error: "Invalid refresh token" });
 
     // Generate new access token
     const newAccessToken = jwt.sign(
@@ -49,7 +49,7 @@ router.post("/refreshToken", express.json(), (req, res) => {
       }
     );
 
-    res.json({ token: newAccessToken });
+    res.status(200).json({ token: newAccessToken });
   });
 });
 

@@ -12,10 +12,10 @@ router.get("/fetch", async (req, res) => {
     const bankNotes = rows.map((row) => parseInt(row._rawData[0]) || "0", 10);
     const quantities = rows.map((row) => parseInt(row._rawData[1] || "0", 10));
 
-    res.json({ bankNotes, quantities });
+    res.status(200).json({ bankNotes, quantities });
   } catch (error) {
     console.error("Error fetching quantities:", error);
-    res.status(500).send("Error fetching data from Google Sheets.");
+    res.status(500).json({ error: "Error fetching data from Google Sheets." });
   }
 });
 
@@ -24,7 +24,7 @@ router.post("/update", async (req, res) => {
   try {
     const { quantities } = req.body; // An array of quantities
     if (!Array.isArray(quantities)) {
-      return res.status(400).send("Invalid data format");
+      return res.status(400).json({ error: "Invalid data format" });
     }
 
     const sheet = await getGoogleSheet(process.env.SHEET_TITLE);
@@ -36,10 +36,10 @@ router.post("/update", async (req, res) => {
       await row.save(); // Ensure the save operation completes
     });
 
-    res.status(200).send("Quantities updated successfully.");
+    res.status(200).json({ message: "Quantities updated successfully." });
   } catch (error) {
     console.error("Error updating quantities:", error);
-    res.status(500).send("Error updating data in Google Sheets.");
+    res.status(500).json({ error: "Error updating data in Google Sheets." });
   }
 });
 

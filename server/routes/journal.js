@@ -8,7 +8,7 @@ router.post("/append", async (req, res) => {
     const { date, account, amount, note } = req.body;
 
     if (!date || !account || !amount) {
-      return res.status(400).send("Missing required fields.");
+      return res.status(400).json({ error: "Missing required fields." });
     }
 
     const sheet = await getGoogleSheet("Journal");
@@ -30,7 +30,9 @@ router.post("/append", async (req, res) => {
       existingRow.set("Amount", amount);
       existingRow.set("Notes", note);
       await existingRow.save();
-      return res.status(200).send("Journal entry updated successfully.");
+      return res
+        .status(200)
+        .json({ message: "Journal entry updated successfully." });
     } else {
       // Add new row if not found
       await sheet.addRow({
@@ -39,11 +41,15 @@ router.post("/append", async (req, res) => {
         Amount: amount,
         Notes: note,
       });
-      return res.status(200).send("Journal entry added successfully.");
+      return res
+        .status(201)
+        .json({ message: "Journal entry added successfully." });
     }
   } catch (error) {
     console.error("Error appending or updating journal entry:", error);
-    return res.status(500).send("Failed to append or update journal entry.");
+    return res
+      .status(500)
+      .json({ error: "Failed to append or update journal entry." });
   }
 });
 
@@ -114,14 +120,14 @@ router.get("/getSuggestions", async (req, res) => {
       .map((row) => row._rawData[3]) // Get column D
       .filter((name) => !!name);
 
-    res.json({
+    res.status(200).json({
       accounts: accountNames,
       foodNames: foodNames,
       otherItems: OtherItems,
     });
   } catch (error) {
     console.error("Error fetching accounts:", error);
-    res.status(500).send("Failed to fetch account list.");
+    res.status(500).json({ error: "Failed to fetch account list." });
   }
 });
 
