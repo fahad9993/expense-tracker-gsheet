@@ -12,6 +12,7 @@ import {
 import { Stack, useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
+import axios from "axios";
 
 import { AuthContext } from "@/context/AuthContext";
 import { Colors } from "@/utils/colors";
@@ -44,29 +45,26 @@ const Index = () => {
     setIsLoggingIn(true);
     Keyboard.dismiss();
     try {
-      const response = await fetch(`${apiEndpoint}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+      const response = await axios.post(`${apiEndpoint}/login`, {
+        username,
+        password,
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        const token = data.token;
-        const refreshToken = data.refreshToken;
+      const data = response.data;
+      const token = data.token;
+      const refreshToken = data.refreshToken;
 
-        if (token && refreshToken) {
-          authCtx.authenticate(token, refreshToken);
-          router.replace("/dashboard");
-        } else {
-          Alert.alert("Login Failed", "Invalid response from server");
-        }
-      } else {
-        Alert.alert("Login Failed", "Invalid username or password");
+      if (token && refreshToken) {
+        authCtx.authenticate(token, refreshToken);
+        router.replace("/dashboard");
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      Alert.alert("Login Failed", "An error occurred during login");
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.response?.data?.message ||
+          error.message ||
+          "An error occurred during login."
+      );
     } finally {
       setIsLoggingIn(false);
     }

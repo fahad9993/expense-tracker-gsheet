@@ -18,8 +18,10 @@ import BankNoteSkeleton from "@/components/LoadingSkeleton/BankNoteSkeleton";
 import { arraysAreEqual } from "@/utils/functions";
 import { useRefresh } from "@/hooks/useRefresh";
 import { BASE_URL } from "@/api/apiConfig";
+import { useAxios } from "@/hooks/useAxios";
 
 export default function Home() {
+  const api = useAxios();
   const apiEndpoint = `${BASE_URL}/home`;
   const [bankNotes, setBankNotes] = useState<number[]>([]);
   const [quantities, setQuantities] = useState<number[]>([]);
@@ -32,10 +34,10 @@ export default function Home() {
 
   // Function to fetch the data from the server
   const fetchData = async () => {
-    const response = await authCtx.authFetch(`${apiEndpoint}/fetch`);
+    const response = await api.get(`${apiEndpoint}/fetch`);
 
     const { bankNotes: fetchedBankNotes, quantities: fetchedQuantities } =
-      await response.json();
+      response.data;
 
     const safeBankNotes = fetchedBankNotes ?? [];
     const safeQuantities =
@@ -65,7 +67,12 @@ export default function Home() {
         setQuantities(safeQuantities);
         lastSavedQuantities.current = safeQuantities;
       } catch (error: any) {
-        Alert.alert("Error", error.message || "Failed to fetch data.");
+        Alert.alert(
+          "Error",
+          error.response?.data?.message ||
+            error.message ||
+            "Failed to fetch data."
+        );
         if (error.message?.includes("Session expired")) {
           authCtx.logout();
         }
@@ -90,21 +97,11 @@ export default function Home() {
   };
 
   const updateQuantities = async (newQuantities: number[]) => {
-    const response = await authCtx.authFetch(`${apiEndpoint}/update`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ quantities: newQuantities }),
+    const response = await api.post(`${apiEndpoint}/update`, {
+      quantities: newQuantities,
     });
 
-    if (!response.ok) {
-      const errorMessage = await response.text();
-      throw new Error(errorMessage || "Failed to update quantities.");
-    }
-
-    const successMessage = await response.text();
-    return successMessage;
+    return response.data.message;
   };
 
   const handleUpdate = async () => {
@@ -132,7 +129,10 @@ export default function Home() {
       Toast.show({
         type: "error",
         text1: "Error!",
-        text2: error.message || "Failed to update quantities.",
+        text2:
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to update quantities.",
       });
     } finally {
       setIsUpdating(false);

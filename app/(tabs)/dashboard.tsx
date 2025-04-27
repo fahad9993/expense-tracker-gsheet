@@ -20,8 +20,10 @@ import DashboardSkeleton from "@/components/LoadingSkeleton/DashboardSkeleton";
 import { arraysAreEqual } from "@/utils/functions";
 import { useRefresh } from "@/hooks/useRefresh";
 import { BASE_URL } from "@/api/apiConfig";
+import { useAxios } from "@/hooks/useAxios";
 
 export default function Dashboard() {
+  const api = useAxios();
   const apiEndpoint = `${BASE_URL}/dashboard`;
   const [amounts, setAmounts] = useState<number[]>([0, 0, 0, 0]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -46,28 +48,29 @@ export default function Dashboard() {
 
   const fetchData = useCallback(async () => {
     try {
-      const response = await authCtx.authFetch(`${apiEndpoint}/fetch`);
-      if (response.ok) {
-        const data = await response.json();
-        const sanitizedAmounts = data.amounts.map((amount: number) =>
-          amount !== null ? amount : 0
-        );
-        setAmounts(sanitizedAmounts);
-        lastSavedAmount.current = sanitizedAmounts;
-        setVariance(data.variance);
-        const pieFormatted = data.pieChart.labels.map(
-          (label: string, i: number) => ({
-            accountName: label,
-            amount: data.pieChart.values[i],
-            currentAmount: data.pieChart.currentValues[i],
-          })
-        );
-        setPieData(pieFormatted);
-      } else {
-        console.error("Failed to fetch data:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Error fetching data: ", error);
+      const response = await api.get(`${apiEndpoint}/fetch`);
+      const data = response.data;
+      const sanitizedAmounts = data.amounts.map((amount: number) =>
+        amount !== null ? amount : 0
+      );
+      setAmounts(sanitizedAmounts);
+      lastSavedAmount.current = sanitizedAmounts;
+      setVariance(data.variance);
+      const pieFormatted = data.pieChart.labels.map(
+        (label: string, i: number) => ({
+          accountName: label,
+          amount: data.pieChart.values[i],
+          currentAmount: data.pieChart.currentValues[i],
+        })
+      );
+      setPieData(pieFormatted);
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to fetch data."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -114,28 +117,24 @@ export default function Dashboard() {
     setIsUpdating(true);
 
     try {
-      const response = await authCtx.authFetch(`${apiEndpoint}/update`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ amounts: updatedAmounts }),
+      const response = await api.post(`${apiEndpoint}/update`, {
+        amounts: updatedAmounts,
       });
 
-      const message = await response.text();
-
-      if (response.ok) {
-        Toast.show({
-          type: "success",
-          text1: "Success",
-          text2: message,
-        });
-      }
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: response.data.message,
+      });
 
       lastSavedAmount.current = updatedAmounts;
-    } catch (error) {
-      console.error("Error updating amounts: ", error);
-      Alert.alert("Error", "Something went wrong while updating.");
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.response?.data?.message ||
+          error.message ||
+          "Something went wrong while updating."
+      );
     } finally {
       setIsUpdating(false);
       setModalVisible(false);

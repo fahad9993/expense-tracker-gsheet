@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -9,18 +9,19 @@ import {
   FlatList,
   TextInput,
   Keyboard,
+  ActivityIndicator,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Toast from "react-native-toast-message";
 
 import CustomButton from "@/components/CustomButton";
-import { AuthContext } from "@/context/AuthContext";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import ItemsTable from "@/components/ItemsTable";
 import { Colors } from "@/utils/colors";
 import { useKeyboard } from "@/context/KeyboardContext";
 import { BASE_URL } from "@/api/apiConfig";
+import { useAxios } from "@/hooks/useAxios";
 
 type Item = {
   note: string;
@@ -28,12 +29,12 @@ type Item = {
 };
 
 export default function Journal() {
+  const api = useAxios();
   const formatDate = (date: Date) => {
     return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
   };
 
   const apiEndpoint = `${BASE_URL}/journal`;
-  const authCtx = useContext(AuthContext);
   const [isAccountClicked, setIsAccountClicked] = useState(false);
 
   const [date, setDate] = useState(new Date());
@@ -57,6 +58,7 @@ export default function Journal() {
   >([]);
   const [accountError, setAccountError] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [fetchingExistingEntry, setFetchingExistingEntry] = useState(false);
   const lastFetchedRef = useRef<{ account: string; dateText: string } | null>(
     null
   );
@@ -83,15 +85,18 @@ export default function Journal() {
   useEffect(() => {
     const fetchAccount = async () => {
       try {
-        const response = await authCtx.authFetch(
-          `${apiEndpoint}/getSuggestions`
-        );
-        const data = await response.json();
+        const response = await api.get(`${apiEndpoint}/getSuggestions`);
+        const data = response.data;
         setAccountSuggestions(data.accounts);
         setFoodSuggestions(data.foodNames);
         setOtherSuggestions(data.otherItems);
-      } catch (error) {
-        console.error("Failed to fetch accounts: ", error);
+      } catch (error: any) {
+        Alert.alert(
+          "Error",
+          error.response?.data?.message ||
+            error.message ||
+            "Failed to fetch data."
+        );
       }
     };
 
@@ -99,67 +104,87 @@ export default function Journal() {
   }, []);
 
   const fetchExistingEntry = async () => {
+    setFetchingExistingEntry(true);
     try {
-      const response = await authCtx.authFetch(
-        `${apiEndpoint}/fetch?date=${encodeURIComponent(
-          dateText
-        )}&account=${encodeURIComponent(account)}`
+      const response = await api.get(`${apiEndpoint}/fetch`, {
+        params: {
+          date: dateText,
+          account: account,
+        },
+      });
+
+      const { Notes, Amount } = response.data || {};
+
+      // Handle empty or undefined response data
+      if (!response.data || !Notes || !Amount) {
+        setItems([]);
+        return;
+      }
+
+      // Split Notes into an array
+      const notesArray =
+        Notes.split(",").map((note: string) => note.trim()) || [];
+
+      // Determine amounts (either formula or single value)
+      let amountsArray: string[] = [];
+
+      if (Amount.startsWith("=")) {
+        // Handle formula case
+        amountsArray = Amount.replace(/^=/, "")
+          .split("+")
+          .map((amt: string) =>
+            amt
+              .replace(/[^0-9.]/g, "") // Remove non-numeric characters (e.g., $)
+              .replace(/\.00$/, "") // Remove trailing .00
+              .trim()
+          );
+      } else {
+        // Handle single value case
+        const cleanAmount = Amount.replace(/[^0-9.]/g, "")
+          .replace(/\.00$/, "")
+          .trim();
+
+        amountsArray = notesArray.map((_: string, i: number) =>
+          i === 0 ? cleanAmount || "0" : "0"
+        );
+      }
+
+      // Map notes to fetched items
+      const fetchedItems: Item[] = notesArray.map(
+        (note: string, index: number) => ({
+          note,
+          amount: amountsArray[index] || "0",
+        })
       );
 
-      const data = await response.json();
-
-      if (response.ok && data) {
-        const notesArray =
-          data.Notes?.split(",").map((note: string) => note.trim()) || [];
-
-        let amountsArray: string[] = [];
-
-        if (data.Amount?.startsWith("=")) {
-          // Formula case
-          amountsArray = data.Amount.replace(/^=/, "")
-            .split("+")
-            .map((amt: string) =>
-              amt
-                .replace(/[^0-9.]/g, "") // Remove non-numeric (e.g., $)
-                .replace(/\.00$/, "") // Remove trailing .00
-                .trim()
-            );
-        } else {
-          // Single value case
-          const cleanAmount = data.Amount?.replace(/[^0-9.]/g, "")
-            .replace(/\.00$/, "")
-            .trim();
-
-          // Assign value to first item, rest 0
-          amountsArray = notesArray.map((_: string, i: number) =>
-            i === 0 ? cleanAmount || "0" : "0"
-          );
-        }
-
-        const fetchedItems: Item[] = notesArray.map(
-          (note: string, index: number) => ({
-            note,
-            amount: amountsArray[index] || "0",
-          })
-        );
-
-        if (fetchedItems.length > 1) {
-          fetchedItems.sort((a, b) => a.note.localeCompare(b.note));
-        }
-
-        setItems(fetchedItems);
-      } else {
-        setItems([]);
+      // Sort items if more than one
+      if (fetchedItems.length > 1) {
+        fetchedItems.sort((a, b) => a.note.localeCompare(b.note));
       }
-    } catch (error) {
-      console.error("Error fetching entry:", error);
+
+      setItems(fetchedItems);
+    } catch (error: any) {
+      if (error.response.status === 404) {
+      } else {
+        Alert.alert(
+          "Error",
+          error.response?.data?.message ||
+            error.message ||
+            "Failed to fetch data."
+        );
+      }
       setItems([]);
+    } finally {
+      setFetchingExistingEntry(false);
     }
   };
 
-  useEffect(() => {
+  const handlePreviousEntry = () => {
     const shouldFetch =
       account &&
+      accountSuggestions.find(
+        (suggestedAccount) => suggestedAccount === account
+      ) &&
       dateText &&
       (lastFetchedRef.current?.account !== account ||
         lastFetchedRef.current?.dateText !== dateText);
@@ -168,7 +193,13 @@ export default function Journal() {
       fetchExistingEntry();
       lastFetchedRef.current = { account, dateText };
     }
-  }, [dateText, account]);
+  };
+
+  useEffect(() => {
+    if (date) {
+      handlePreviousEntry();
+    }
+  }, [date]);
 
   const toggleDatePicker = () => {
     setShowPicker(!showPicker);
@@ -178,7 +209,6 @@ export default function Journal() {
     if (event.type == "set" && selectedDate) {
       const currentDate = selectedDate;
       setDate(currentDate);
-
       if (Platform.OS === "android") {
         toggleDatePicker();
         setDateText(formatDate(currentDate));
@@ -272,7 +302,7 @@ export default function Journal() {
       return;
     }
 
-    if (!note || !amount) {
+    if ((!note || !amount) && items.length === 0) {
       const missingFields = [!note && "Note", !amount && "Amount"]
         .filter(Boolean)
         .join(" and ");
@@ -293,34 +323,26 @@ export default function Journal() {
       items.map((item) => item.amount).join("+");
     setIsUpdating(true);
     try {
-      const response = await authCtx.authFetch(`${apiEndpoint}/append`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          date: dateText,
-          account: account,
-          amount: items.length !== 0 ? combinedAmounts.trim() : amount.trim(),
-          note: items.length !== 0 ? combinedNotes.trim() : note.trim(),
-        }),
+      const response = await api.post(`${apiEndpoint}/append`, {
+        date: dateText,
+        account: account,
+        amount: items.length !== 0 ? combinedAmounts.trim() : amount.trim(),
+        note: items.length !== 0 ? combinedNotes.trim() : note.trim(),
       });
 
-      if (response.ok) {
-        Toast.show({
-          type: "success",
-          text1: "Success",
-          text2: "Journal entry added successfully.",
-        });
-        setItems([]);
-      } else {
-        Alert.alert("Error!", "Failed to add data.");
-      }
-    } catch (error) {
-      console.error("Error adding journal entry:", error);
-      Alert.alert("Error", "Failed to add journal entry. Please try again.", [
-        { text: "OK" },
-      ]);
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: response.data.message,
+      });
+      setItems([]);
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to add journal entry. Please try again."
+      );
     } finally {
       setIsUpdating(false);
       const today = new Date();
@@ -334,6 +356,7 @@ export default function Journal() {
       setFilteredFoodSuggestions([]);
       setFilteredOtherSuggestions([]);
       setItems([]);
+      lastFetchedRef.current = null;
     }
   };
 
@@ -384,6 +407,7 @@ export default function Journal() {
           onBlur={() => {
             setIsAccountClicked(false);
             setAccountError(false);
+            handlePreviousEntry();
           }}
         />
         {isAccountClicked && (
@@ -473,6 +497,12 @@ export default function Journal() {
       >
         <AntDesign name="pluscircleo" size={40} color={Colors.primary} />
       </Pressable>
+
+      {fetchingExistingEntry && (
+        <View style={{ marginTop: 10 }}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+        </View>
+      )}
 
       {items.length > 0 && (
         <ItemsTable items={items} onRemoveItem={handleRemoveItem} />

@@ -1,4 +1,6 @@
 import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+
 import { BASE_URL } from "@/api/apiConfig";
 
 /** Checks if a JWT token is expired */
@@ -16,16 +18,10 @@ export async function refreshAccessToken(
   refreshToken: string
 ): Promise<string | null> {
   try {
-    const response = await fetch(`${BASE_URL}/auth/refreshToken`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken }),
+    const response = await axios.post(`${BASE_URL}/auth/refreshToken`, {
+      refreshToken,
     });
-
-    if (!response.ok) throw new Error("Refresh failed");
-
-    const { token: newAccessToken } = await response.json();
-    return newAccessToken;
+    return response.data.token;
   } catch (err) {
     return null;
   }
