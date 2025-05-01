@@ -44,12 +44,14 @@ export default function PieChartComponent({ pieData }: Props) {
 
   useEffect(() => {
     if (pieData && pieData.length > 0) {
-      const transformed = pieData.map((item, index) => ({
-        text: item.accountName,
-        value: showMonthly ? item.currentAmount : item.amount,
-        color: colors[index],
-        focused: false,
-      }));
+      const transformed = pieData
+        .map((item, index) => ({
+          text: item.accountName,
+          value: showMonthly ? item.currentAmount : item.amount,
+          color: colors[index % colors.length],
+          focused: false,
+        }))
+        .filter((item) => item.value > 0);
       setData(transformed);
     }
   }, [pieData, showMonthly]);
@@ -89,7 +91,7 @@ export default function PieChartComponent({ pieData }: Props) {
         centerLabelComponent={() => {
           return <Text style={{ fontSize: 20 }}>{formatBDNumber(total)}</Text>;
         }}
-        onPress={(item: Data, index: number) => handlePress(index)}
+        onPress={(_item: Data, index: number) => handlePress(index)}
       />
 
       {selectedIndex !== null && (
@@ -102,17 +104,8 @@ export default function PieChartComponent({ pieData }: Props) {
       )}
       <FlatList
         scrollEnabled={false}
-        ref={flatListRef}
-        onScrollToIndexFailed={(info) => {
-          setTimeout(() => {
-            flatListRef.current?.scrollToIndex({
-              index: info.index,
-              animated: true,
-            });
-          }, 500);
-        }}
         data={data}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(_item, index) => index.toString()}
         style={{ marginTop: 10, maxHeight: "auto", width: "100%" }}
         renderItem={({ item, index }) => (
           <View

@@ -55,7 +55,7 @@ export default function LoadingScreen() {
           },
         ]}
       />
-      <Text style={styles.text}>Checking tokens...</Text>
+      <Text style={styles.text}>Loading...</Text>
       <StatusBar backgroundColor={Colors.login} barStyle={"dark-content"} />
     </View>
   );

@@ -317,6 +317,15 @@ export default function Journal() {
       return;
     }
 
+    if (items.length > 0 && !!note && !!amount) {
+      Toast.show({
+        type: "info",
+        text1: "Warning!",
+        text2: "Press the (+) button to add to the list",
+      });
+      return;
+    }
+
     const combinedNotes = items.map((item) => item.note).join(", ");
     const combinedAmounts =
       (items.length > 1 ? "=" : "") +

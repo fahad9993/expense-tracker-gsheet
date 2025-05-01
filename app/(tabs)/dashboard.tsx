@@ -8,6 +8,7 @@ import {
   Alert,
   ScrollView,
   RefreshControl,
+  Keyboard,
 } from "react-native";
 import { useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
@@ -88,6 +89,7 @@ export default function Dashboard() {
   };
 
   const handleUpdate = async () => {
+    Keyboard.dismiss();
     const updatedAmounts = [...amounts];
     const trimmed = newAmount.trim();
 
