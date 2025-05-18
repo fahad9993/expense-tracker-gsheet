@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { View, StyleSheet, Text, FlatList, Pressable } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 
@@ -58,22 +58,16 @@ export default function PieChartComponent({ pieData }: Props) {
 
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const flatListRef = useRef<FlatList>(null);
+  const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
 
-  const handlePress = (index: number) => {
-    const updated = data.map((item, i) => ({
+  const handlePress = (accountName: string) => {
+    const updated = data.map((item) => ({
       ...item,
-      focused: i === index,
+      focused: item.text === accountName,
     }));
 
     setData(updated);
-    setSelectedIndex(index);
-    flatListRef.current?.scrollToIndex({
-      index,
-      animated: true,
-      viewPosition: 0.5, // 0.5 centers the item in the view
-    });
+    setSelectedAccount(accountName);
   };
 
   return (
@@ -91,14 +85,17 @@ export default function PieChartComponent({ pieData }: Props) {
         centerLabelComponent={() => {
           return <Text style={{ fontSize: 20 }}>{formatBDNumber(total)}</Text>;
         }}
-        onPress={(_item: Data, index: number) => handlePress(index)}
+        onPress={(item: Data) => handlePress(item.text)}
       />
 
-      {selectedIndex !== null && (
+      {data.find((item) => item.text === selectedAccount)?.value && (
         <View style={{ marginVertical: 5 }}>
           <Text>
-            {data[selectedIndex].text}:{" "}
-            {formatBDNumber(data[selectedIndex].value)} taka
+            {selectedAccount}:{" "}
+            {formatBDNumber(
+              data.find((item) => item.text === selectedAccount)?.value ?? 0
+            )}{" "}
+            taka
           </Text>
         </View>
       )}
@@ -107,7 +104,7 @@ export default function PieChartComponent({ pieData }: Props) {
         data={data}
         keyExtractor={(_item, index) => index.toString()}
         style={{ marginTop: 10, maxHeight: "auto", width: "100%" }}
-        renderItem={({ item, index }) => (
+        renderItem={({ item }) => (
           <View
             style={[
               {
@@ -119,7 +116,7 @@ export default function PieChartComponent({ pieData }: Props) {
               item.focused ? { backgroundColor: "gray" } : "",
             ]}
           >
-            <Pressable onPress={() => handlePress(index)}>
+            <Pressable onPress={() => handlePress(item.text)}>
               <View
                 style={{
                   flexDirection: "row",

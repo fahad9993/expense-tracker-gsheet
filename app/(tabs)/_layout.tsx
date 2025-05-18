@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { StatusBar } from "react-native";
 import { Tabs, usePathname } from "expo-router";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -46,9 +47,24 @@ export default function TabLayout() {
   return (
     <SafeAreaProvider>
       <>
-        <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
-        <SafeAreaView style={{ flex: 1 }} edges={["left", "right", "bottom"]}>
+        <StatusBar
+          backgroundColor={Colors.primary}
+          barStyle="light-content"
+          translucent={false}
+        />
+        {/* Top safe area with header and green background */}
+        <SafeAreaView
+          style={{ backgroundColor: Colors.primary }}
+          edges={["top"]}
+        >
           <Header title={headerTitle} />
+        </SafeAreaView>
+
+        {/* Main content safe area */}
+        <SafeAreaView
+          style={{ flex: 1, backgroundColor: "white" }}
+          edges={["left", "right", "bottom"]}
+        >
           <Tabs
             tabBar={(props) => <TabBar {...props} />}
             screenOptions={{ headerShown: false }}
@@ -65,6 +81,7 @@ export default function TabLayout() {
             ))}
           </Tabs>
         </SafeAreaView>
+
         <Toast config={toastConfig} />
       </>
     </SafeAreaProvider>
