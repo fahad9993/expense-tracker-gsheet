@@ -1,8 +1,6 @@
 import { createContext, useState, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { isTokenExpired, refreshAccessToken } from "@/utils/auth";
-
 interface AuthContextType {
   accessToken: string | null;
   refreshToken: string | null;
