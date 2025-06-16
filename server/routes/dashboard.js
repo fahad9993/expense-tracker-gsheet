@@ -51,7 +51,7 @@ router.get("/fetch", async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching dashboard info:", error);
-    res.status(500).json({ error: "Failed to fetch account data." });
+    res.status(500).json({ message: "Failed to fetch account data." });
   }
 });
 
@@ -60,7 +60,7 @@ router.post("/update", async (req, res) => {
     const { amounts } = req.body;
 
     if (!Array.isArray(amounts) || amounts.length !== 4) {
-      return res.status(400).json({ error: "Invalid or missing amounts" });
+      return res.status(400).json({ message: "Invalid or missing amounts" });
     }
 
     const accountSheet = await getGoogleSheet("Net Income");
@@ -76,7 +76,7 @@ router.post("/update", async (req, res) => {
     res.status(200).json({ message: "Dashboard updated successfully." });
   } catch (error) {
     console.error("Error updating dashboard info:", error);
-    res.status(500).json({ error: "Failed to update dashboard info." });
+    res.status(500).json({ message: "Failed to update dashboard info." });
   }
 });
 

@@ -8,6 +8,7 @@ import {
   Alert,
   TouchableOpacity,
   Keyboard,
+  ActivityIndicator,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
@@ -60,7 +61,7 @@ const Index = () => {
       }
     } catch (error: any) {
       Alert.alert(
-        "Error",
+        "Error!",
         error.response?.data?.message ||
           error.message ||
           "An error occurred during login."
@@ -117,11 +118,14 @@ const Index = () => {
         onPress={handleLogin}
         disabled={isLoggingIn}
       >
-        <Text
-          style={[styles.buttonText, { color: isLoggingIn ? "black" : "#fff" }]}
-        >
-          {isLoggingIn ? "Logging in..." : "Login"}
-        </Text>
+        {isLoggingIn ? (
+          <View style={styles.spinnerContainer}>
+            <ActivityIndicator size="small" color={Colors.primary} />
+            <Text style={styles.buttonText}>Logging in...</Text>
+          </View>
+        ) : (
+          <Text style={[styles.buttonText, { color: "#fff" }]}>Login</Text>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -148,7 +152,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.login,
   },
   disabledButton: {
-    backgroundColor: Colors.login,
+    backgroundColor: "lightgray",
     borderWidth: 1,
     borderColor: "black",
   },
@@ -182,6 +186,11 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     resizeMode: "contain",
+  },
+  spinnerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
   title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
 });

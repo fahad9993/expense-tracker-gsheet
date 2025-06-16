@@ -25,7 +25,7 @@ router.post("/login", (req, res) => {
 
     return res.status(200).json({ token, refreshToken });
   } else {
-    return res.status(401).json({ error: "Invalid credentials" });
+    return res.status(401).json({ message: "Invalid credentials" });
   }
 });
 
@@ -33,12 +33,12 @@ router.post("/refreshToken", (req, res) => {
   const { refreshToken } = req.body;
 
   if (!refreshToken) {
-    return res.status(401).json({ error: "No refresh token provided." });
+    return res.status(401).json({ message: "No refresh token provided." });
   }
 
   // Verify refresh token
   jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY, (err, user) => {
-    if (err) return res.status(403).json({ error: "Invalid refresh token" });
+    if (err) return res.status(403).json({ message: "Invalid refresh token" });
 
     // Generate new access token
     const newAccessToken = jwt.sign(

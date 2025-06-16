@@ -8,7 +8,7 @@ router.post("/append", async (req, res) => {
     const { date, account, amount, note } = req.body;
 
     if (!date || !account || !amount) {
-      return res.status(400).json({ error: "Missing required fields." });
+      return res.status(400).json({ message: "Missing required fields." });
     }
 
     const sheet = await getGoogleSheet("Journal");
@@ -49,7 +49,7 @@ router.post("/append", async (req, res) => {
     console.error("Error appending or updating journal entry:", error);
     return res
       .status(500)
-      .json({ error: "Failed to append or update journal entry." });
+      .json({ message: "Failed to append or update journal entry." });
   }
 });
 
@@ -59,7 +59,7 @@ router.get("/fetch", async (req, res) => {
   if (!date || !account) {
     return res
       .status(400)
-      .json({ error: "Missing required query parameters." });
+      .json({ message: "Missing required query parameters." });
   }
 
   try {
@@ -98,7 +98,7 @@ router.get("/fetch", async (req, res) => {
     }
   } catch (error) {
     console.error("Error fetching journal entry:", error);
-    return res.status(500).json({ error: "Failed to fetch journal entry." });
+    return res.status(500).json({ message: "Failed to fetch journal entry." });
   }
 });
 
@@ -127,7 +127,7 @@ router.get("/getSuggestions", async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching accounts:", error);
-    res.status(500).json({ error: "Failed to fetch account list." });
+    res.status(500).json({ message: "Failed to fetch account list." });
   }
 });
 
