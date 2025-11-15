@@ -87,7 +87,10 @@ const Index = () => {
           style={styles.input}
           placeholder="Username"
           value={username}
-          onChangeText={(text) => setUsername(text)}
+          onChangeText={setUsername}
+          autoComplete="username"
+          textContentType="username"
+          importantForAutofill="yes"
         />
       </View>
       {/* Password Input */}
@@ -98,7 +101,10 @@ const Index = () => {
           placeholder="Password"
           value={password}
           onChangeText={setPassword}
-          secureTextEntry={!showPassword} // Toggle visibility
+          secureTextEntry={!showPassword}
+          autoComplete="password"
+          textContentType="password"
+          importantForAutofill="yes"
         />
 
         <TouchableOpacity
