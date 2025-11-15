@@ -8,6 +8,8 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 
+import { Colors } from "@/utils/colors";
+
 type TabBarButtonProps = {
   onPress: () => void;
   isFocused: boolean;
@@ -77,7 +79,7 @@ const styles = StyleSheet.create({
     color: "#777",
   },
   labelFocused: {
-    color: "green",
+    color: Colors.primary,
     fontWeight: "bold",
   },
 });

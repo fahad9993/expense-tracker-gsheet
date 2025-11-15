@@ -504,7 +504,7 @@ export default function Journal() {
         ]}
         onPress={handleAddItems}
       >
-        <AntDesign name="pluscircleo" size={40} color={Colors.primary} />
+        <AntDesign name="plus-circle" size={40} color={Colors.primary} />
       </Pressable>
 
       {fetchingExistingEntry && (

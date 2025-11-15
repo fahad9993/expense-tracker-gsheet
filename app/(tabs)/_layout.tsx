@@ -36,6 +36,13 @@ const tabs: {
     title: "Journal",
     icon: (color, size) => <AntDesign name="form" size={size} color={color} />,
   },
+  {
+    name: "filter",
+    title: "Filter",
+    icon: (color, size) => (
+      <AntDesign name="filter" size={size} color={color} />
+    ),
+  },
 ];
 
 export default function TabLayout() {

@@ -56,7 +56,10 @@ export default function PieChartComponent({ pieData }: Props) {
     }
   }, [pieData, showMonthly]);
 
-  const total = data.reduce((sum, item) => sum + item.value, 0);
+  const total = pieData.reduce((sum, item) => {
+    const rawValue = showMonthly ? item.currentAmount : item.amount;
+    return sum + rawValue;
+  }, 0);
 
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
 
@@ -77,16 +80,24 @@ export default function PieChartComponent({ pieData }: Props) {
         handlePress={() => setShowMonthly(!showMonthly)}
         buttonStyle={styles.button}
       />
-      <PieChart
-        donut
-        radius={150}
-        sectionAutoFocus
-        data={data}
-        centerLabelComponent={() => {
-          return <Text style={{ fontSize: 20 }}>{formatBDNumber(total)}</Text>;
-        }}
-        onPress={(item: Data) => handlePress(item.text)}
-      />
+
+      {/* FIX: Avoid chart crash when empty */}
+      {data.length === 0 ? (
+        <Text style={{ marginTop: 20 }}>No data available</Text>
+      ) : (
+        <PieChart
+          donut
+          radius={150}
+          sectionAutoFocus
+          data={data}
+          centerLabelComponent={() => {
+            return (
+              <Text style={{ fontSize: 20 }}>{formatBDNumber(total)}</Text>
+            );
+          }}
+          onPress={(item: Data) => handlePress(item.text)}
+        />
+      )}
 
       {data.find((item) => item.text === selectedAccount)?.value && (
         <View style={{ marginVertical: 5 }}>
@@ -99,11 +110,12 @@ export default function PieChartComponent({ pieData }: Props) {
           </Text>
         </View>
       )}
+
       <FlatList
         scrollEnabled={false}
         data={data}
         keyExtractor={(_item, index) => index.toString()}
-        style={{ marginTop: 10, maxHeight: "auto", width: "100%" }}
+        style={{ marginTop: 10, width: "100%" }}
         renderItem={({ item }) => (
           <View
             style={[
@@ -113,7 +125,7 @@ export default function PieChartComponent({ pieData }: Props) {
                 justifyContent: "space-between",
                 padding: 5,
               },
-              item.focused ? { backgroundColor: "gray" } : "",
+              item.focused ? { backgroundColor: "gray" } : null,
             ]}
           >
             <Pressable onPress={() => handlePress(item.text)}>

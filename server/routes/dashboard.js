@@ -28,7 +28,7 @@ router.get("/fetch", async (req, res) => {
 
     const currentMonth = new Date().getMonth();
 
-    for (let i = 17; i <= 29; i++) {
+    for (let i = 17; i <= 30; i++) {
       // B18:B30 and O18:O30
       const label = reportSheet.getCell(i, 1).value; // B column (1-based index)
       const value = reportSheet.getCell(i, 14).value; // O column (1-based index)

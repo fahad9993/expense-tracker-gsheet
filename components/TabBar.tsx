@@ -1,8 +1,10 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+
 import TabBarButton from "./TabBarButton";
 import { useKeyboard } from "@/context/KeyboardContext";
+import { Colors } from "@/utils/colors";
 
 const TabBar: React.FC<BottomTabBarProps> = ({
   state,
@@ -27,7 +29,7 @@ const TabBar: React.FC<BottomTabBarProps> = ({
         const isFocused = state.index === index;
         const icon = options.tabBarIcon?.({
           focused: isFocused,
-          color: isFocused ? "green" : "#999",
+          color: isFocused ? Colors.primary : "#999",
           size: 20,
         });
 
@@ -51,7 +53,7 @@ const TabBar: React.FC<BottomTabBarProps> = ({
                 ? String(
                     label({
                       focused: isFocused,
-                      color: isFocused ? "green" : "#999",
+                      color: isFocused ? Colors.primary : "#999",
                       position: "below-icon",
                       children: route.name,
                     })
